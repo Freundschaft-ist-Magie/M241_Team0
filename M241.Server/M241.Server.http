@@ -1,0 +1,6 @@
+@M241.Server_HostAddress = http://localhost:5170
+
+GET {{M241.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
