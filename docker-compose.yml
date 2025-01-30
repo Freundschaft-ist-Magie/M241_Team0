@@ -1,0 +1,28 @@
+services:
+  m241.server:
+    image: ${DOCKER_REGISTRY-}m241server
+    build:
+      context: .
+      dockerfile: M241.Server/Dockerfile
+  postgres:
+    image: postgres:14-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - m241_db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=dbuser
+      - POSTGRES_DB=m241
+  phpmyadmin:
+      image: phpmyadmin:latest
+      container_name: luminapath-phpmyadmin
+      ports:
+          - 8087:80
+      depends_on:
+          - postgres
+      environment:
+          PMA_HOST: postgres
+          PMA_PORT: 5432
+volumes:
+  m241_db:

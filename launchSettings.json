@@ -1,0 +1,22 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "m241.server": "StartDebugging",
+        "phpmyadmin": "StartWithoutDebugging",
+        "postgres": "StartWithoutDebugging"
+      }
+    },
+    "Db Only": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "m241.server": "DoNotStart",
+        "phpmyadmin": "StartWithoutDebugging",
+        "postgres": "StartWithoutDebugging"
+      }
+    }
+  }
+}
