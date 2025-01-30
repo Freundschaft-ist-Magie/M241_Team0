@@ -1,4 +1,4 @@
-namespace M241.Server
+namespace M241.Server.Common.Entities
 {
     public class WeatherForecast
     {

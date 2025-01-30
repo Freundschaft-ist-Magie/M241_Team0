@@ -1,3 +1,4 @@
+using M241.Server.Common.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace M241.Server.Controllers

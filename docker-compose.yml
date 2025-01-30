@@ -4,6 +4,8 @@ services:
     build:
       context: .
       dockerfile: M241.Server/Dockerfile
+    environment:
+    - ConnectionStrings__Default=Host=postgres;Port=5432;Database=m241;Username=dbuser;Password=admin;
   postgres:
     image: postgres:14-alpine
     ports:
@@ -14,15 +16,15 @@ services:
       - POSTGRES_PASSWORD=admin
       - POSTGRES_USER=dbuser
       - POSTGRES_DB=m241
-  phpmyadmin:
-      image: phpmyadmin:latest
-      container_name: luminapath-phpmyadmin
-      ports:
-          - 8087:80
-      depends_on:
-          - postgres
-      environment:
-          PMA_HOST: postgres
-          PMA_PORT: 5432
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    ports:
+      - "8086:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - postgres
 volumes:
   m241_db:

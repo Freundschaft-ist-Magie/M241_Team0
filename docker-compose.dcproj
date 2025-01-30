@@ -5,6 +5,7 @@
     <DockerTargetOS>Linux</DockerTargetOS>
     <DockerPublishLocally>False</DockerPublishLocally>
     <ProjectGuid>9456d317-6a46-442c-9a04-c7503a5aa33a</ProjectGuid>
+    <DockerComposeProjectName>m241</DockerComposeProjectName>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
     <DockerServiceName>m241.server</DockerServiceName>

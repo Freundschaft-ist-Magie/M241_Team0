@@ -5,7 +5,7 @@
       "commandVersion": "1.0",
       "serviceActions": {
         "m241.server": "StartDebugging",
-        "phpmyadmin": "StartWithoutDebugging",
+        "pgadmin": "StartWithoutDebugging",
         "postgres": "StartWithoutDebugging"
       }
     },
@@ -14,7 +14,7 @@
       "commandVersion": "1.0",
       "serviceActions": {
         "m241.server": "DoNotStart",
-        "phpmyadmin": "StartWithoutDebugging",
+        "pgadmin": "StartWithoutDebugging",
         "postgres": "StartWithoutDebugging"
       }
     }
