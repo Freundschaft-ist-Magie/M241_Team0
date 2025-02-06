@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace M241.Server.Migrations
 {
     [DbContext(typeof(AeroSenseDbContext))]
-    [Migration("20250130091729_InitDb")]
-    partial class InitDb
+    [Migration("20250206071351_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -89,6 +89,23 @@ namespace M241.Server.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("M241.Server.Data.Models.ClientDevice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ClientDevice");
+                });
+
             modelBuilder.Entity("M241.Server.Data.Models.Room", b =>
                 {
                     b.Property<int>("Id")
@@ -97,14 +114,20 @@ namespace M241.Server.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("ClientId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Humidity")
                         .HasColumnType("integer");
 
-                    b.Property<string>("RoomName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClientId")
+                        .IsUnique();
 
                     b.ToTable("Rooms");
                 });
@@ -241,6 +264,17 @@ namespace M241.Server.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("M241.Server.Data.Models.Room", b =>
+                {
+                    b.HasOne("M241.Server.Data.Models.ClientDevice", "Client")
+                        .WithOne("Room")
+                        .HasForeignKey("M241.Server.Data.Models.Room", "ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Client");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -290,6 +324,11 @@ namespace M241.Server.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("M241.Server.Data.Models.ClientDevice", b =>
+                {
+                    b.Navigation("Room");
                 });
 #pragma warning restore 612, 618
         }
