@@ -1,0 +1,16 @@
+﻿@page "/"
+@using M241.Server.Data
+@using M241.Server.Data.Models
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AeroSenseDbContext> contextFactory
+<PageTitle>Dashboard</PageTitle>
+<h3>Rooms</h3>
+
+@code {
+    List<Room> RoomData { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = await contextFactory.CreateDbContextAsync();
+        RoomData = await context.Rooms.ToListAsync();
+    }
+}
