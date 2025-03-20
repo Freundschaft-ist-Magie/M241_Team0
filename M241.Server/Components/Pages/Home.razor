@@ -6,8 +6,13 @@
 <PageTitle>Dashboard</PageTitle>
 <h3>Rooms</h3>
 
+@foreach(var room in RoomData)
+{
+    <div>@room.Humidity</div>
+}
+
 @code {
-    List<Room> RoomData { get; set; }
+    List<Room> RoomData { get; set; } = new();
     protected override async Task OnInitializedAsync()
     {
         using var context = await contextFactory.CreateDbContextAsync();
