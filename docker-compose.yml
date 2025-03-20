@@ -5,7 +5,9 @@ services:
       context: .
       dockerfile: M241.Server/Dockerfile
     environment:
-    - ConnectionStrings__Default=Host=postgres;Port=5432;Database=m241;Username=dbuser;Password=admin;
+        - ConnectionStrings__Default=Host=postgres;Port=5432;Database=m241;Username=dbuser;Password=admin;
+    depends_on:
+        - postgres
   postgres:
     image: postgres:14-alpine
     ports:
