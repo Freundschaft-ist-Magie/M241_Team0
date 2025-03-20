@@ -6,27 +6,11 @@ services:
       dockerfile: M241.Server/Dockerfile
     environment:
         - ConnectionStrings__Default=Host=postgres;Port=5432;Database=m241;Username=dbuser;Password=admin;
-    depends_on:
-        - postgres
-  postgres:
-    image: postgres:14-alpine
+        - ASPNETCORE_ENVIRONMENT=Release
+        - ASPNETCORE_HTTP_PORTS=80
+        - ASPNETCORE_HTTPS_PORTS=443
     ports:
-      - 5432:5432
-    volumes:
-      - m241_db:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_PASSWORD=admin
-      - POSTGRES_USER=dbuser
-      - POSTGRES_DB=m241
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: pgadmin
-    ports:
-      - "8086:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    depends_on:
-      - postgres
+      - "80:80"
+      - "443:443"
 volumes:
   m241_db:

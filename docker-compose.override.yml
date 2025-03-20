@@ -2,11 +2,30 @@ services:
   m241.server:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8080
-      - ASPNETCORE_HTTPS_PORTS=8081
-    ports:
-      - "8080"
-      - "8081"
+      - ASPNETCORE_HTTP_PORTS=80
+      - ASPNETCORE_HTTPS_PORTS=443
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+    depends_on:
+        - postgres
+  postgres:
+    image: postgres:14-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - m241_db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=dbuser
+      - POSTGRES_DB=m241
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    ports:
+      - "8086:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - postgres
