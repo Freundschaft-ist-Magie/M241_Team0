@@ -6,10 +6,14 @@
 <PageTitle>Dashboard</PageTitle>
 <h3>Rooms</h3>
 
-@foreach(var room in RoomData)
-{
-    <div>@room.Humidity</div>
-}
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="5" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                Data="@RoomData" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+    <Columns>
+        <RadzenDataGridColumn Property="@nameof(Room.Id)" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn Property="@nameof(Room.Humidity)" Title="Huidity" Frozen="true" Width="160px" />
+        <RadzenDataGridColumn Property="@nameof(Room.ClientId)" Title="Client Id" Width="160px" />
+    </Columns>
+</RadzenDataGrid>
 
 @code {
     List<Room> RoomData { get; set; } = new();

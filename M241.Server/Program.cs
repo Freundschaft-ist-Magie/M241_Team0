@@ -2,6 +2,7 @@ using M241.Server.Components;
 using M241.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,7 @@ builder.Services.AddControllers()
 builder.Services.AddOpenApi();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddRadzenComponents();
 
 var connectionstring = builder.Configuration.GetConnectionString("Default") ?? throw new Exception("No connectionstring provied");
 builder.Services.AddDbContextFactory<AeroSenseDbContext>(opt =>
@@ -25,7 +27,7 @@ builder.Services.AddTransient<AeroSenseDbContext>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (true /*app.Environment.IsDevelopment()*/)
 {
     app.MapOpenApi();
     app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "M241"));
