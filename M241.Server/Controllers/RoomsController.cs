@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using M241.Server.Data;
 using M241.Server.Data.Models;
+using M241.Server.Common.Dtos;
 
 namespace M241.Server.Controllers
 {
@@ -45,14 +46,14 @@ namespace M241.Server.Controllers
         // PUT: api/Rooms/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRoom(int id, Room room)
+        public async Task<IActionResult> PutRoom(int id, RoomDto roomDto)
         {
-            if (id != room.Id)
+            if (id != roomDto.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(room).State = EntityState.Modified;
+            _context.Entry(roomDto).State = EntityState.Modified;
 
             try
             {
@@ -76,9 +77,9 @@ namespace M241.Server.Controllers
         // POST: api/Rooms
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Room>> PostRoom(Room room)
+        public async Task<ActionResult<Room>> PostRoom(RoomDto room)
         {
-            _context.Rooms.Add(room);
+            _context.Rooms.Add(room.MapToRoom());
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetRoom", new { id = room.Id }, room);

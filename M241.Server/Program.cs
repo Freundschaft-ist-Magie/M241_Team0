@@ -22,7 +22,9 @@ builder.Services.AddRadzenComponents();
 var connectionstring = builder.Configuration.GetConnectionString("Default") ?? throw new Exception("No connectionstring provied");
 builder.Services.AddDbContextFactory<AeroSenseDbContext>(opt =>
     opt.UseNpgsql(connectionstring));
+
 builder.Services.AddTransient<AeroSenseDbContext>();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -50,5 +52,7 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.MapHealthChecks("/healthz");
 
 app.Run();
