@@ -1,3 +1,4 @@
+#include <Arduino_JSON.h>
 #include <WiFiNINA.h>
 #include <SPI.h>
 #include "secrets.h"
@@ -49,7 +50,26 @@ void setup() {
 }
 
 void loop() {
-  
+  if (bme.performReading()) {
+    JSONVar json(1024);
+    json["id"] = 0;
+    json["macAddress"] = macAddress;
+    json["temperature"] = bme.temperature;
+    json["humidity"] = bme.humidity;
+    json["pressure"] = bme.pressure;
+    json["gas"] = bme.gas_resistance;
+    
+    client.beginRequest();
+    client.post("/api/RoomDatas", "application/json", JSON.stringify(json));
+    client.endRequest();
+
+    Serial.print("Status code for POST request: ");
+    Serial.println(client.responseStatusCode());
+    Serial.print("Response for POST request: ");
+    Serial.println(client.responseBody());
+  } else {
+    Serial.println("Failed to perform reading :(");
+  }
 }
 
 String getMacAddress() {
