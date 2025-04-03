@@ -1,6 +1,8 @@
 using M241.Server;
 using M241.Server.Components;
 using M241.Server.Data;
+using M241.Server.Data.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Radzen;
@@ -24,6 +26,12 @@ var connectionstring = builder.Configuration.GetConnectionString("Default") ?? t
 builder.Services.AddDbContextFactory<AeroSenseDbContext>(opt =>
     opt.UseNpgsql(connectionstring));
 
+builder.Services.AddIdentityApiEndpoints<AppUser>()
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<AeroSenseDbContext>()
+    .AddSignInManager()
+    .AddDefaultTokenProviders();
+
 builder.Services.AddTransient<AeroSenseDbContext>();
 builder.Services.AddHealthChecks();
 
@@ -43,8 +51,10 @@ if (true /*app.Environment.IsDevelopment()*/)
 }
 
 app.UseAuthorization();
+app.UseAuthentication();
 
 app.MapControllers();
+app.MapIdentityApi<AppUser>();
 
 
 app.UseAntiforgery();
