@@ -3,11 +3,10 @@
     public class RoomData
     {
         public int Id { get; set; }
-        public int Humidity { get; set; }
-        public int Temperature { get; set; }
-        public int AQI { get; set; }
-        public int NO2 { get; set; }
-        public int O3 { get; set; }
+        public float Humidity { get; set; }
+        public float Temperature { get; set; }
+        public float Pressure { get; set; }
+        public float Gas { get; set; }
         public DateTime TimeStamp { get; set; }
         public ClientDevice? Client { get; set; }
         public string? ClientId { get; set; }

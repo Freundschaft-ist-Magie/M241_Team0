@@ -5,11 +5,10 @@ namespace M241.Server.Common.Dtos
     public class CreateRoomDataDto
     {
         public int Id { get; set; }
-        public int Humidity { get; set; }
-        public int Temperature { get; set; }
-        public int AQI { get; set; }
-        public int NO2 { get; set; }
-        public int O3 { get; set; }
+        public float Humidity { get; set; }
+        public float Temperature { get; set; }
+        public float Pressure { get; set; }
+        public float Gas { get; set; }
         public string ClientId { get; set; }
         public int RoomId { get; set; }
 
@@ -20,11 +19,10 @@ namespace M241.Server.Common.Dtos
                 Id = Id,
                 Humidity = Humidity,
                 ClientId = ClientId,
-                AQI = AQI,
-                NO2 = NO2,
+                Pressure = Pressure,
+                Gas = Gas,
                 RoomId =
                 RoomId,
-                O3 = O3,
                 Temperature = Temperature,
                 TimeStamp = DateTime.Now.ToUniversalTime(),
             };
