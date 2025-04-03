@@ -8,8 +8,6 @@
         public float Pressure { get; set; }
         public float Gas { get; set; }
         public DateTime TimeStamp { get; set; }
-        public ClientDevice? Client { get; set; }
-        public string? ClientId { get; set; }
         public Room? Room { get; set; }
         public int RoomId { get; set; }
     }

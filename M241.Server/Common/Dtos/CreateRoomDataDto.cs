@@ -1,4 +1,5 @@
 ﻿using M241.Server.Data.Models;
+using System.Net.Mail;
 
 namespace M241.Server.Common.Dtos
 {
@@ -9,20 +10,17 @@ namespace M241.Server.Common.Dtos
         public float Temperature { get; set; }
         public float Pressure { get; set; }
         public float Gas { get; set; }
-        public string ClientId { get; set; }
-        public int RoomId { get; set; }
+        public string MACAddress { get; set; }
 
-        public RoomData MapToRoomData()
+        public RoomData MapToRoomData(Room room)
         {
             return new RoomData
             {
                 Id = Id,
                 Humidity = Humidity,
-                ClientId = ClientId,
                 Pressure = Pressure,
+                Room = room,
                 Gas = Gas,
-                RoomId =
-                RoomId,
                 Temperature = Temperature,
                 TimeStamp = DateTime.Now.ToUniversalTime(),
             };

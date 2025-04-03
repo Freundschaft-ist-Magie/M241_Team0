@@ -17,7 +17,7 @@ namespace M241.Server
             var room = new Room()
             {
                 Id = 1,
-                Name = "Test",
+                MACAddress = "Test",
             };
 
             await context.Rooms.AddAsync(room);

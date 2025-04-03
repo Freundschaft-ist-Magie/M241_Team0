@@ -52,8 +52,9 @@ namespace M241.Server.Controllers
             {
                 return BadRequest();
             }
+            var room = await _context.Rooms.FirstAsync(r => r.MACAddress == roomData.MACAddress);
 
-            _context.Entry(roomData.MapToRoomData()).State = EntityState.Modified;
+            _context.Entry(roomData.MapToRoomData(room)).State = EntityState.Modified;
 
             try
             {
@@ -79,16 +80,15 @@ namespace M241.Server.Controllers
         [HttpPost]
         public async Task<ActionResult<RoomData>> PostRoomData(CreateRoomDataDto roomData)
         {
-            if(!_context.Clients.Any(c => c.Id == roomData.ClientId))
+            var room = await _context.Rooms.FirstOrDefaultAsync(c => c.MACAddress == roomData.MACAddress);
+            if(room is null)
             {
-                _context.Clients.Add(new ClientDevice()
+                room = new Room()
                 {
-                    Id = roomData.ClientId,
-                    Name = "Test",
-                    RoomId = _context.Rooms.First().Id
-                });
+                    MACAddress = roomData.MACAddress,
+                };
             }
-            _context.RoomData.Add(roomData.MapToRoomData());
+            _context.RoomData.Add(roomData.MapToRoomData(room));
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetRoomData", new { id = roomData.Id }, roomData);
