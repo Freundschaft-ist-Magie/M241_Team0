@@ -16,5 +16,7 @@ namespace M241.Server.Data
         }
 
         public DbSet<Room> Rooms { get; set; }
+        public DbSet<RoomData> RoomData { get; set; }
+        public DbSet <ClientDevice> Clients { get; set; }
     }
 }

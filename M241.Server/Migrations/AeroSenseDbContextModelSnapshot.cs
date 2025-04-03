@@ -88,23 +88,21 @@ namespace M241.Server.Migrations
 
             modelBuilder.Entity("M241.Server.Data.Models.ClientDevice", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("MACAddr")
-                        .IsRequired()
+                    b.Property<string>("Id")
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("RoomId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
-                    b.ToTable("ClientDevice");
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("Clients");
                 });
 
             modelBuilder.Entity("M241.Server.Data.Models.Room", b =>
@@ -115,11 +113,28 @@ namespace M241.Server.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Rooms");
+                });
+
+            modelBuilder.Entity("M241.Server.Data.Models.RoomData", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
                     b.Property<int>("AQI")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ClientId")
-                        .HasColumnType("integer");
+                    b.Property<string>("ClientId")
+                        .HasColumnType("text");
 
                     b.Property<int>("Humidity")
                         .HasColumnType("integer");
@@ -127,22 +142,25 @@ namespace M241.Server.Migrations
                     b.Property<int>("NO2")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<int>("O3")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RoomId")
                         .HasColumnType("integer");
 
                     b.Property<int>("Temperature")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime>("TimeStamp")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ClientId")
-                        .IsUnique();
+                    b.HasIndex("ClientId");
 
-                    b.ToTable("Rooms");
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("RoomData");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -277,15 +295,32 @@ namespace M241.Server.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("M241.Server.Data.Models.Room", b =>
+            modelBuilder.Entity("M241.Server.Data.Models.ClientDevice", b =>
+                {
+                    b.HasOne("M241.Server.Data.Models.Room", "Room")
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("M241.Server.Data.Models.RoomData", b =>
                 {
                     b.HasOne("M241.Server.Data.Models.ClientDevice", "Client")
-                        .WithOne("Room")
-                        .HasForeignKey("M241.Server.Data.Models.Room", "ClientId")
+                        .WithMany()
+                        .HasForeignKey("ClientId");
+
+                    b.HasOne("M241.Server.Data.Models.Room", "Room")
+                        .WithMany()
+                        .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Client");
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -337,11 +372,6 @@ namespace M241.Server.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("M241.Server.Data.Models.ClientDevice", b =>
-                {
-                    b.Navigation("Room");
                 });
 #pragma warning restore 612, 618
         }

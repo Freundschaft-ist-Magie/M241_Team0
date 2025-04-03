@@ -52,7 +52,7 @@ namespace M241.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ClientDevice",
+                name: "Rooms",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -61,7 +61,7 @@ namespace M241.Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ClientDevice", x => x.Id);
+                    table.PrimaryKey("PK_Rooms", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -171,22 +171,51 @@ namespace M241.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Rooms",
+                name: "Clients",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    RoomId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Clients", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Clients_Rooms_RoomId",
+                        column: x => x.RoomId,
+                        principalTable: "Rooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RoomData",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
                     Humidity = table.Column<int>(type: "integer", nullable: false),
-                    ClientId = table.Column<int>(type: "integer", nullable: false)
+                    Temperature = table.Column<int>(type: "integer", nullable: false),
+                    AQI = table.Column<int>(type: "integer", nullable: false),
+                    NO2 = table.Column<int>(type: "integer", nullable: false),
+                    O3 = table.Column<int>(type: "integer", nullable: false),
+                    TimeStamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ClientId = table.Column<string>(type: "text", nullable: true),
+                    RoomId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Rooms", x => x.Id);
+                    table.PrimaryKey("PK_RoomData", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Rooms_ClientDevice_ClientId",
+                        name: "FK_RoomData_Clients_ClientId",
                         column: x => x.ClientId,
-                        principalTable: "ClientDevice",
+                        principalTable: "Clients",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_RoomData_Rooms_RoomId",
+                        column: x => x.RoomId,
+                        principalTable: "Rooms",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -229,10 +258,19 @@ namespace M241.Server.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Rooms_ClientId",
-                table: "Rooms",
-                column: "ClientId",
-                unique: true);
+                name: "IX_Clients_RoomId",
+                table: "Clients",
+                column: "RoomId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RoomData_ClientId",
+                table: "RoomData",
+                column: "ClientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RoomData_RoomId",
+                table: "RoomData",
+                column: "RoomId");
         }
 
         /// <inheritdoc />
@@ -254,7 +292,7 @@ namespace M241.Server.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Rooms");
+                name: "RoomData");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -263,7 +301,10 @@ namespace M241.Server.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "ClientDevice");
+                name: "Clients");
+
+            migrationBuilder.DropTable(
+                name: "Rooms");
         }
     }
 }

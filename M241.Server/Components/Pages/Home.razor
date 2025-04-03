@@ -7,19 +7,19 @@
 <h3>Rooms</h3>
 
 <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="5" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                Data="@RoomData" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+                Data="@RoomDatas" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
     <Columns>
-        <RadzenDataGridColumn Property="@nameof(Room.Id)" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
-        <RadzenDataGridColumn Property="@nameof(Room.Humidity)" Title="Huidity" Frozen="true" Width="160px" />
-        <RadzenDataGridColumn Property="@nameof(Room.ClientId)" Title="Client Id" Width="160px" />
+        <RadzenDataGridColumn Property="@nameof(RoomData.Id)" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn Property="@nameof(RoomData.Humidity)" Title="Huidity" Frozen="true" Width="160px" />
+        <RadzenDataGridColumn Property="@nameof(RoomData.ClientId)" Title="Client Id" Width="160px" />
     </Columns>
 </RadzenDataGrid>
 
 @code {
-    List<Room> RoomData { get; set; } = new();
+    List<RoomData> RoomDatas { get; set; } = new();
     protected override async Task OnInitializedAsync()
     {
         using var context = await contextFactory.CreateDbContextAsync();
-        RoomData = await context.Rooms.ToListAsync();
+        RoomDatas = await context.RoomData.ToListAsync();
     }
 }

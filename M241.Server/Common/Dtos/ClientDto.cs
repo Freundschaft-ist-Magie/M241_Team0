@@ -9,7 +9,7 @@ namespace M241.Server.Common.Dtos
 
         public ClientDevice MapToClient()
         {
-            return new ClientDevice { Id = 0, Name = Name, MACAddr = Id };
+            return new ClientDevice { Id = Id, Name = Name };
         }
     }
 }

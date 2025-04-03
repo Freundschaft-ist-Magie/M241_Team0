@@ -22,14 +22,12 @@ namespace M241.Server.Controllers
             _context = context;
         }
 
-        // GET: api/Rooms
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Room>>> GetRooms()
         {
             return await _context.Rooms.ToListAsync();
         }
 
-        // GET: api/Rooms/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Room>> GetRoom(int id)
         {
@@ -43,10 +41,8 @@ namespace M241.Server.Controllers
             return room;
         }
 
-        // PUT: api/Rooms/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRoom(int id, RoomDto roomDto)
+        public async Task<IActionResult> PutRoom(int id, Room roomDto)
         {
             if (id != roomDto.Id)
             {
@@ -74,18 +70,15 @@ namespace M241.Server.Controllers
             return NoContent();
         }
 
-        // POST: api/Rooms
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Room>> PostRoom(RoomDto room)
+        public async Task<ActionResult<Room>> PostRoom(Room room)
         {
-            _context.Rooms.Add(room.MapToRoom());
+            _context.Rooms.Add(room);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetRoom", new { id = room.Id }, room);
         }
 
-        // DELETE: api/Rooms/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRoom(int id)
         {

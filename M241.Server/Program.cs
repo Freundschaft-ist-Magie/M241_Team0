@@ -1,3 +1,4 @@
+using M241.Server;
 using M241.Server.Components;
 using M241.Server.Data;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+        options.JsonSerializerOptions.PropertyNamingPolicy = null;
     });
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -36,6 +37,7 @@ if (true /*app.Environment.IsDevelopment()*/)
     using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<AeroSenseDbContext>();
+        await SeedData.SeedDb(db);
         await db.Database.MigrateAsync();
     }
 }
