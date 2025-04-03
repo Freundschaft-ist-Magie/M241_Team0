@@ -7,21 +7,8 @@ namespace M241.Server
     {
         public static async Task SeedDb(this AeroSenseDbContext context)
         {
-            await SeedRooms(context);
-        }
-
-        public static async Task SeedRooms(AeroSenseDbContext context)
-        {
-            if (context.Rooms.Any()) return;
-
-            var room = new Room()
-            {
-                Id = 1,
-                MACAddress = "Test",
-            };
-
-            await context.Rooms.AddAsync(room);
-            await context.SaveChangesAsync();
+            await Task.Yield();
+            return;
         }
     }
 }
