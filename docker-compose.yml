@@ -12,5 +12,18 @@ services:
     ports:
       - "80:80"
       - "443:443"
+  mosquitto:
+    build: ./M241.Broker
+    environment:
+      - MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME:-mosquitto}
+      - MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD:-admin}
+    volumes:
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+    ports:
+      - 1883:1883
+      - 9001:9001
 volumes:
   m241_db:
+  mosquitto_data:
+  mosquitto_log:
