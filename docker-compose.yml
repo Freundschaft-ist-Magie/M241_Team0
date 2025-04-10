@@ -8,9 +8,9 @@ services:
         - ConnectionStrings__Default=Host=postgres;Port=5432;Database=m241;Username=dbuser;Password=admin;
         - ASPNETCORE_ENVIRONMENT=Release
         - ASPNETCORE_HTTP_PORTS=80
-        - MQTT__server=mosquitto;
-        - MQTT__user=mosquitto;
-        - MQTT__password=admin;
+        - MQTT__server=mosquitto
+        - MQTT__user=mosquitto
+        - MQTT__password=admin
     ports:
       - "80:80"
     depends_on:
