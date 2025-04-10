@@ -11,7 +11,6 @@ services:
         - ASPNETCORE_HTTPS_PORTS=443
     ports:
       - "80:80"
-      - "443:443"
   mosquitto:
     build: ./M241.Broker
     environment:
@@ -22,7 +21,7 @@ services:
       - mosquitto_log:/mosquitto/log
     ports:
       - 1883:1883
-      - 9001:9001
+      - 9002:9001
 volumes:
   m241_db:
   mosquitto_data:
