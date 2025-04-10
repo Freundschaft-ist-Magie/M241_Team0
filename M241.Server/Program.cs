@@ -2,6 +2,7 @@ using M241.Server;
 using M241.Server.Components;
 using M241.Server.Data;
 using M241.Server.Data.Models;
+using M241.Server.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
@@ -33,6 +34,7 @@ builder.Services.AddIdentityApiEndpoints<AppUser>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddTransient<AeroSenseDbContext>();
+builder.Services.AddHostedService<MqttService>();
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
