@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Radzen;
+using System.Net.WebSockets;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +38,15 @@ builder.Services.AddIdentityApiEndpoints<AppUser>()
 builder.Services.AddTransient<AeroSenseDbContext>();
 builder.Services.AddHostedService<MqttService>();
 builder.Services.AddHealthChecks();
+string frontendUrl = builder.Configuration["FrontendUrl"] ??
+    throw new ArgumentException("Missing frontend url in appsettings.");
+
+
+builder.Services.AddCors(options => options.AddPolicy("SPA", policy => policy
+    .WithOrigins(frontendUrl)
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .AllowCredentials()));
 
 var app = builder.Build();
 
@@ -57,6 +67,7 @@ if (true /*app.Environment.IsDevelopment()*/)
 
 app.UseAuthorization();
 app.UseAuthentication();
+app.UseCors("SPA");
 
 app.MapControllers();
 app.MapGroup("/api")
@@ -72,6 +83,7 @@ var webSocketOptions = new WebSocketOptions
 {
     KeepAliveInterval = TimeSpan.FromMinutes(2)
 };
+webSocketOptions.AllowedOrigins.Add(frontendUrl);
 
 app.UseWebSockets(webSocketOptions);
 
