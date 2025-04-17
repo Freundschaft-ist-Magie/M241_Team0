@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Radzen;
+using System.Net.WebSockets;
 
 var builder = WebApplication.CreateBuilder(args);
 
