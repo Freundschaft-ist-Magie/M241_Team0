@@ -1,0 +1,84 @@
+﻿@using System.Globalization
+
+<RadzenStack class="rz-p-0 rz-p-md-6 rz-p-lg-12">
+    <RadzenCard Variant="Variant.Outlined">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.Wrap">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenCheckBox @bind-Value="@smooth" Name="smooth"></RadzenCheckBox>
+                <RadzenLabel Text="Smooth" Component="smooth" />
+            </RadzenStack>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenCheckBox @bind-Value="@showDataLabels" Name="dataLabels"></RadzenCheckBox>
+                <RadzenLabel Text="Show Data Labels" Component="dataLabels" />
+            </RadzenStack>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenCheckBox @bind-Value="@showMarkers" Name="markers"></RadzenCheckBox>
+                <RadzenLabel Text="Show Markers" Component="markers" />
+            </RadzenStack>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenCheckBox @bind-Value="@sharedTooltip" Name="sharedToltip"></RadzenCheckBox>
+                <RadzenLabel Text="Shared Tooltip" Component="sharedTooltip" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenCard>
+
+    <RadzenChart>
+        <RadzenChartTooltipOptions Shared="@sharedTooltip" />
+        <RadzenLineSeries Smooth="@smooth" Data="@Temp" CategoryProperty="Date" Title="Temperatur" LineType="LineType.Dashed" ValueProperty="Value">
+            <RadzenMarkers Visible="@showMarkers" MarkerType="MarkerType.Square" />
+            <RadzenSeriesDataLabels Visible="@showDataLabels" />
+        </RadzenLineSeries>
+        <RadzenLineSeries Smooth="@smooth" Data="@Humidity" CategoryProperty="Date" Title="Feuchtigkeit" ValueProperty="Value">
+            <RadzenMarkers Visible="@showMarkers" MarkerType="MarkerType.Circle" />
+            <RadzenSeriesDataLabels Visible="@showDataLabels" />
+        </RadzenLineSeries>
+        <RadzenCategoryAxis Padding="20" />
+        <RadzenValueAxis>
+            <RadzenGridLines Visible="true" />
+            <RadzenAxisTitle Text="Value" />
+        </RadzenValueAxis>
+    </RadzenChart>
+</RadzenStack>
+
+@code {
+    bool smooth = false;
+    bool sharedTooltip = true;
+    bool showDataLabels = false;
+    bool showMarkers = true;
+
+    [Parameter]
+    public List<Data.Models.RoomData> RoomDatas { get; set; } = new();
+
+    protected override void OnParametersSet()
+    {
+        List<DataItem> temp = new();
+        List<DataItem> humidity = new();
+        foreach (var item in RoomDatas)
+        {
+            temp.Add(new DataItem
+                {
+                    Date = item.TimeStamp.ToShortDateString(),
+                    Value = item.Temperature
+                });
+            humidity.Add(new DataItem
+                {
+                    Date = item.TimeStamp.ToShortDateString(),
+                    Value = item.Humidity
+                });
+        }
+        Temp = temp.ToArray();
+        Humidity = humidity.ToArray();
+    }
+
+    class DataItem
+    {
+        public string Date { get; set; }
+        public double Value { get; set; }
+    }
+
+    DataItem[] Temp = new DataItem[] {
+    };
+
+    DataItem[] Humidity = new DataItem[] {
+    };
+}
