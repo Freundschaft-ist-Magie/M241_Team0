@@ -59,7 +59,8 @@ app.UseAuthorization();
 app.UseAuthentication();
 
 app.MapControllers();
-app.MapIdentityApi<AppUser>();
+app.MapGroup("/api")
+    .MapIdentityApi<AppUser>();
 
 
 app.UseAntiforgery();
