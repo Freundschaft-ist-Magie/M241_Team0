@@ -9,14 +9,10 @@
 #include <Adafruit_Sensor.h>
 #include "Adafruit_BME680.h"
 
-#define BME_SCK 13
-#define BME_MISO 12
-#define BME_MOSI 11
 #define BME_CS 10
-#define SEALEVELPRESSURE_HPA (1013.25)
 
-char wifiSsid[] = WIFI_SSID;
-char wifiPass[] = WIFI_PASS;
+char wiFiSsid[] = WIFI_SSID;
+char wiFiPass[] = WIFI_PASS;
 char mqttUser[] = MQTT_USER;
 char mqttPass[] = MQTT_PASS;
 char mqttHost[] = MQTT_HOST;
@@ -24,25 +20,19 @@ int mqttPort = MQTT_PORT;
 char mqttQueue[] = MQTT_QUEUE;
 
 String macAddress;
+WiFiClient wiFiClient;
 
 Adafruit_BME680 bme(BME_CS);
-WiFiClient wifiClient;
-PubSubClient mqttClient(wifiClient);
+PubSubClient mqttClient(wiFiClient);
 
 void setup() {
   Serial.begin(9600);
   while (!Serial);
 
-  if (!bme.begin()) {
-    Serial.println("Could not find a valid BME680 sensor, check wiring!");
-    while (1);
-  }
-
-  connectWifi();
+  initSensor();
 
   macAddress = getMacAddress();
-  Serial.print("Mac Address: ");
-  Serial.println(macAddress);
+  connectWiFi();
 
   mqttClient.setServer(mqttHost, mqttPort);
   connectMqtt();
@@ -52,80 +42,94 @@ void loop() {
   if (bme.performReading()) {
     if (WiFi.status() == WL_CONNECTED) {
       if (mqttClient.connected()) {
-        JSONVar json(1024);
-        json["id"] = 0;
-        json["macAddress"] = macAddress;
-        json["temperature"] = bme.temperature;
-        json["humidity"] = bme.humidity;
-        json["pressure"] = bme.pressure;
-        json["gas"] = bme.gas_resistance;
-
-        mqttClient.publish(mqttQueue, JSON.stringify(json).c_str());
-        Serial.println("Published data");
+        publishSensorData();
       } else {
-        Serial.println("Disconnected from MQTT server, trying to reconnect...");
-        connectMqtt();
+        reconnectMqtt();
       }
     } else {
-      reconnectWifi();
+      reconnectWiFi();
     }
   } else {
     Serial.println("Failed to perform BME680 sensor reading :(");
   }
 }
 
-void connectWifi() {
-  int wifiStatus = WL_IDLE_STATUS;
-  while (wifiStatus != WL_CONNECTED) {
-    Serial.print("Attempting to connect to Network named: ");
-    Serial.println(wifiSsid);
-
-    wifiStatus = WiFi.begin(wifiSsid, wifiPass);
-
-    delay(10000);
+void initSensor() {
+  if (!bme.begin()) {
+    Serial.println("Could not find a valid BME680 sensor, check wiring!");
+    while (1);
   }
-  
-  Serial.print("Connected to network named: ");
-  Serial.println(wifiSsid);
-  Serial.print("IP Address: ");
-  Serial.println(WiFi.localIP());
-}
-
-void reconnectWifi() {
-  Serial.println("Disconnected from WiFi, trying to reconnect...");
-  connectWifi();
-}
-
-void connectMqtt() {
-  while (!mqttClient.connected()) {
-    if (WiFi.status() == WL_CONNECTED) {
-      Serial.print("Attempting to connect to MQTT ");
-      Serial.print(mqttHost);
-      Serial.print(":");
-      Serial.println(mqttPort);
-      if (!mqttClient.connect("arduinoClient", mqttUser, mqttPass)) {
-        delay(5000);
-      }
-    } else {
-      reconnectWifi();
-    }
-  }
-  Serial.println("MQTT connection established!");
 }
 
 String getMacAddress() {
   byte mac[6];
   WiFi.macAddress(mac);
-  String macStr = "";
+  char buf[18];
+  sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  return String(buf);
+}
 
-  for (int i = 0; i < 6; i++) {
-    if (mac[i] < 16) {
-      macStr += "0";
+void connectWiFi() {
+  int wiFiStatus = WL_IDLE_STATUS;
+  while (wiFiStatus != WL_CONNECTED) {
+    if(wiFiStatus != WL_IDLE_STATUS) {
+      delay(5000);
     }
-    macStr += String(mac[i], HEX);
-    if (i < 5) macStr += ":";
+    wiFiStatus = attemptWiFiConnection();
   }
+  
+  Serial.print("Connected to network named: ");
+  Serial.println(wiFiSsid);
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
+}
 
-  macStr.toUpperCase();
-  return macStr;
+int attemptWiFiConnection() {
+  Serial.print("Attempting to connect to Network named: ");
+  Serial.println(wiFiSsid);
+  return WiFi.begin(wiFiSsid, wiFiPass);
+}
+
+void connectMqtt() {
+  while (!mqttClient.connected()) {
+    if (WiFi.status() == WL_CONNECTED) {
+      if (!attemptMqttConnection()) {
+        delay(5000);
+      }
+    } else {
+      reconnectWiFi();
+    }
+  }
+  Serial.println("MQTT connection established!");
+}
+
+bool attemptMqttConnection() {
+  Serial.print("Attempting to connect to MQTT ");
+  Serial.print(mqttHost);
+  Serial.print(":");
+  Serial.println(mqttPort);
+  return mqttClient.connect("arduinoClient", mqttUser, mqttPass);
+}
+
+void reconnectWiFi() {
+  Serial.println("Disconnected from WiFi, trying to reconnect...");
+  connectWiFi();
+}
+
+void reconnectMqtt() {
+  Serial.println("Disconnected from MQTT server, trying to reconnect...");
+  connectMqtt();
+}
+
+void publishSensorData() {
+  JSONVar json(1024);
+  json["id"] = 0;
+  json["macAddress"] = macAddress;
+  json["temperature"] = bme.temperature;
+  json["humidity"] = bme.humidity;
+  json["pressure"] = bme.pressure;
+  json["gas"] = bme.gas_resistance;
+
+  mqttClient.publish(mqttQueue, JSON.stringify(json).c_str());
+  Serial.println("Published data");
 }
