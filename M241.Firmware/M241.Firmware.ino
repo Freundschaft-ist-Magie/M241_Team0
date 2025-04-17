@@ -8,8 +8,6 @@
 #include "secrets.h"
 #include "config.h"
 
-#define BME_CS 10
-
 char wiFiSsid[] = WIFI_SSID;
 char wiFiPass[] = WIFI_PASS;
 char mqttUser[] = MQTT_USER;
@@ -21,7 +19,7 @@ char mqttQueue[] = MQTT_QUEUE;
 String macAddress;
 WiFiClient wiFiClient;
 
-Adafruit_BME680 bme(BME_CS);
+Adafruit_BME680 bme(10);
 PubSubClient mqttClient(wiFiClient);
 
 void setup() {
