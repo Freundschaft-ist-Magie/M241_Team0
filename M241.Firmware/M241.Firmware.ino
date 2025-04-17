@@ -15,6 +15,7 @@ const char* mqttPass = MQTT_PASS;
 const char* mqttHost = MQTT_HOST;
 const int mqttPort = MQTT_PORT;
 const char* mqttQueue = MQTT_QUEUE;
+const boolean debuggingEnabled = DEBUGGING_ENABLED;
 
 String macAddress;
 WiFiClient wiFiClient;
@@ -24,7 +25,9 @@ PubSubClient mqttClient(wiFiClient);
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial);
+  if(debuggingEnabled) {
+    while (!Serial);
+  }
 
   initSensor();
 
