@@ -105,7 +105,8 @@ bool attemptMqttConnection() {
   Serial.print(mqttHost);
   Serial.print(":");
   Serial.println(mqttPort);
-  return mqttClient.connect("arduinoClient", mqttUser, mqttPass);
+  String clientId = "arduinoClient-" + macAddress;
+  return mqttClient.connect(clientId.c_str(), mqttUser, mqttPass);
 }
 
 void reconnectWiFi() {
