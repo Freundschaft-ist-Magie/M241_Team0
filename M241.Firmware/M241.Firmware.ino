@@ -2,6 +2,7 @@
 #include <WiFiNINA.h>
 #include <SPI.h>
 #include "secrets.h"
+#include "config.h"
 #include <PubSubClient.h>
 #include <Wire.h>
 #include <SPI.h>
@@ -16,7 +17,10 @@
 
 char wifiSsid[] = WIFI_SSID;
 char wifiPass[] = WIFI_PASS;
+char mqttUser[] = MQTT_USER;
 char mqttPass[] = MQTT_PASS;
+char mqttHost[] = MQTT_HOST;
+char mqttQueue[] = MQTT_QUEUE;
 int status = WL_IDLE_STATUS;
 String macAddress;
 
@@ -48,37 +52,40 @@ void setup() {
   
   macAddress = getMacAddress();
 
-  mqttClient.setServer("192.168.165.222", 1883);
-  mqttClient.connect("arduinoClient", "mosquitto", mqttPass);
+  mqttClient.setServer(mqttHost, 1883);
+  mqttClient.connect("arduinoClient", mqttUser, mqttPass);
 }
 
 void loop() {
   if (bme.performReading()) {
-    if (!mqttClient.connected()) {
+    if (mqttClient.connected()) {
+      JSONVar json(1024);
+      json["id"] = 0;
+      json["macAddress"] = macAddress;
+      json["temperature"] = bme.temperature;
+      json["humidity"] = bme.humidity;
+      json["pressure"] = bme.pressure;
+      json["gas"] = bme.gas_resistance;
 
+      mqttClient.publish(mqttQueue, JSON.stringify(json).c_str());
+      Serial.println("Published data");
+    } else {
+      Serial.println("Disconnected from MQTT server, trying to reconnect...");
+      reconnect();
     }
-    JSONVar json(1024);
-    json["id"] = 0;
-    json["macAddress"] = macAddress;
-    json["temperature"] = bme.temperature;
-    json["humidity"] = bme.humidity;
-    json["pressure"] = bme.pressure;
-    json["gas"] = bme.gas_resistance;
-
-    mqttClient.publish("room/data", JSON.stringify(json).c_str());
-    Serial.println("Published Data");
   } else {
-    Serial.println("Failed to perform reading :(");
+    Serial.println("Failed to perform sensor reading :(");
   }
 }
 
 void reconnect() {
   while (!mqttClient.connected()) {
-    if (mqttClient.connect("arduinoClient", "mosquitto", mqttPass)) {
+    if (mqttClient.connect("arduinoClient", mqttUser, mqttPass)) {
     } else {
       delay(5000);
     }
   }
+  Serial.println("MQTT connection reestablished!");
 }
 
 String getMacAddress() {
