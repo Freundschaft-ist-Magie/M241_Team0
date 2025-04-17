@@ -2,7 +2,7 @@
 #include <WiFiNINA.h>
 #include <SPI.h>
 #include "secrets.h"
-#include <ArduinoHttpClient.h>
+#include <PubSubClient.h>
 #include <Wire.h>
 #include <SPI.h>
 #include <Adafruit_Sensor.h>
@@ -14,14 +14,15 @@
 #define BME_CS 10
 #define SEALEVELPRESSURE_HPA (1013.25)
 
-char ssid[] = SECRET_SSID;
-char pass[] = SECRET_PASS;
+char wifiSsid[] = WIFI_SSID;
+char wifiPass[] = WIFI_PASS;
+char mqttPass[] = MQTT_PASS;
 int status = WL_IDLE_STATUS;
 String macAddress;
 
 Adafruit_BME680 bme(BME_CS);
 WiFiClient wifiClient;
-HttpClient client = HttpClient(wifiClient, "192.168.168.222", 8080);
+PubSubClient mqttClient(wifiClient);
 
 void setup() {
   Serial.begin(9600);
@@ -34,23 +35,28 @@ void setup() {
 
   while (status != WL_CONNECTED) {
     Serial.print("Attempting to connect to Network named: ");
-    Serial.println(ssid);
+    Serial.println(wifiSsid);
 
-    status = WiFi.begin(ssid, pass);
+    status = WiFi.begin(wifiSsid, wifiPass);
     delay(10000);
   }
   
   Serial.print("Connected to network named: ");
-  Serial.println(ssid);
+  Serial.println(wifiSsid);
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
   
   macAddress = getMacAddress();
-  performHealthCheck();
+
+  mqttClient.setServer("192.168.165.222", 1883);
+  mqttClient.connect("arduinoClient", "mosquitto", mqttPass);
 }
 
 void loop() {
   if (bme.performReading()) {
+    if (!mqttClient.connected()) {
+
+    }
     JSONVar json(1024);
     json["id"] = 0;
     json["macAddress"] = macAddress;
@@ -58,17 +64,20 @@ void loop() {
     json["humidity"] = bme.humidity;
     json["pressure"] = bme.pressure;
     json["gas"] = bme.gas_resistance;
-    
-    client.beginRequest();
-    client.post("/api/RoomDatas", "application/json", JSON.stringify(json));
-    client.endRequest();
 
-    Serial.print("Status code for POST request: ");
-    Serial.println(client.responseStatusCode());
-    Serial.print("Response for POST request: ");
-    Serial.println(client.responseBody());
+    mqttClient.publish("room/data", JSON.stringify(json).c_str());
+    Serial.println("Published Data");
   } else {
     Serial.println("Failed to perform reading :(");
+  }
+}
+
+void reconnect() {
+  while (!mqttClient.connected()) {
+    if (mqttClient.connect("arduinoClient", "mosquitto", mqttPass)) {
+    } else {
+      delay(5000);
+    }
   }
 }
 
@@ -87,16 +96,4 @@ String getMacAddress() {
 
   macStr.toUpperCase();
   return macStr;
-}
-
-void performHealthCheck() {
-  Serial.println("Performing API health check...");
-  client.beginRequest();
-  client.get("/healthz");
-  client.endRequest();
-
-  Serial.print("Status code for health check: ");
-  Serial.println(client.responseStatusCode());
-  Serial.print("Response for health check: ");
-  Serial.println(client.responseBody());
 }
