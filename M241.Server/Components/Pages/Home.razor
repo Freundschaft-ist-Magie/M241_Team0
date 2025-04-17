@@ -10,10 +10,14 @@
                 Data="@RoomDatas" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
     <Columns>
         <RadzenDataGridColumn Property="@nameof(RoomData.Id)" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
-        <RadzenDataGridColumn Property="@nameof(RoomData.Humidity)" Title="Huidity" Frozen="true" Width="160px" />
+        <RadzenDataGridColumn Property="@nameof(RoomData.Temperature)" Title="Temperatur" Frozen="true" Width="160px" />
+        <RadzenDataGridColumn Property="@nameof(RoomData.Pressure)" Title="Druck" Frozen="true" Width="160px" />
+        <RadzenDataGridColumn Property="@nameof(RoomData.Gas)" Title="Gas" Frozen="true" Width="160px" />
+        <RadzenDataGridColumn Property="@nameof(RoomData.Humidity)" Title="Feuchtigkeit" Frozen="true" Width="160px" />
         <RadzenDataGridColumn Property="@nameof(RoomData.RoomId)" Title="Client Id" Width="160px" />
     </Columns>
 </RadzenDataGrid>
+<Statstic RoomDatas="RoomDatas" />
 
 @code {
     List<RoomData> RoomDatas { get; set; } = new();
