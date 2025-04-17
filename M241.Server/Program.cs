@@ -5,6 +5,7 @@ using M241.Server.Data.Models;
 using M241.Server.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Radzen;
 
@@ -47,7 +48,9 @@ if (true /*app.Environment.IsDevelopment()*/)
     using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<AeroSenseDbContext>();
-        await SeedData.SeedDb(db);
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        await SeedData.SeedDb(db, userManager, roleManager);
         await db.Database.MigrateAsync();
     }
 }
@@ -64,6 +67,12 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+var webSocketOptions = new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2)
+};
+
+app.UseWebSockets(webSocketOptions);
 
 app.MapHealthChecks("/healthz");
 
