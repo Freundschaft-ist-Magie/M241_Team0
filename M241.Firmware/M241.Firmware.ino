@@ -121,7 +121,7 @@ void reconnectMqtt() {
 }
 
 void publishSensorData() {
-  JSONVar json(1024);
+  JSONVar json;
   json["id"] = 0;
   json["macAddress"] = macAddress;
   json["temperature"] = bme.temperature;
