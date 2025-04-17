@@ -1,6 +1,5 @@
 #include <Arduino_JSON.h>
 #include <WiFiNINA.h>
-#include <SPI.h>
 #include "secrets.h"
 #include "config.h"
 #include <PubSubClient.h>
