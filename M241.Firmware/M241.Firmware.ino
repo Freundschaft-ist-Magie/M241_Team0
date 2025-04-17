@@ -8,13 +8,13 @@
 #include "secrets.h"
 #include "config.h"
 
-char wiFiSsid[] = WIFI_SSID;
-char wiFiPass[] = WIFI_PASS;
-char mqttUser[] = MQTT_USER;
-char mqttPass[] = MQTT_PASS;
-char mqttHost[] = MQTT_HOST;
-int mqttPort = MQTT_PORT;
-char mqttQueue[] = MQTT_QUEUE;
+const char* wiFiSsid = WIFI_SSID;
+const char* wiFiPass = WIFI_PASS;
+const char* mqttUser = MQTT_USER;
+const char* mqttPass = MQTT_PASS;
+const char* mqttHost = MQTT_HOST;
+const int mqttPort = MQTT_PORT;
+const char* mqttQueue = MQTT_QUEUE;
 
 String macAddress;
 WiFiClient wiFiClient;
