@@ -12,7 +12,7 @@ services:
         - MQTT__user=mosquitto
         - MQTT__password=admin
     ports:
-      - "80:80"
+      - "8081:80"
     depends_on:
         - mosquitto
   mosquitto:
