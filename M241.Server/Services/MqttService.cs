@@ -60,15 +60,14 @@ namespace M241.Server.Services
                         context.RoomData.Add(roomData.MapToRoomData(room));
                         await context.SaveChangesAsync();
                     }
+                    var response = await _client.ConnectAsync(_options, cancellationToken);
+                    Console.WriteLine("MQTT Result {0}", response.ResultCode);
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"❌ Error: {ex.Message}");
                 }
             };
-
-            var response = await _client.ConnectAsync(_options, cancellationToken);
-            Console.WriteLine("MQTT Result {0}", response.ResultCode);
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)

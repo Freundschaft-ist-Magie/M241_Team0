@@ -60,8 +60,8 @@ if (true /*app.Environment.IsDevelopment()*/)
         var db = scope.ServiceProvider.GetRequiredService<AeroSenseDbContext>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        await SeedData.SeedDb(db, userManager, roleManager);
         await db.Database.MigrateAsync();
+        await SeedData.SeedDb(db, userManager, roleManager);
     }
 }
 
