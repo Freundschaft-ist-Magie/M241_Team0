@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Concurrent;
+using M241.Server.Common.Dtos;
 
 namespace M241.Server.Controllers
 {
@@ -20,8 +21,26 @@ namespace M241.Server.Controllers
         private async Task SendRoomData(WebSocket webSocket)
         {
             var roomDataList = await _context.RoomData.ToListAsync();
+            var mappedRoomData = RoomDataDto.MapFromRooms(roomDataList);
 
-            var json = JsonSerializer.Serialize(roomDataList, new JsonSerializerOptions
+            var json = JsonSerializer.Serialize(mappedRoomData, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = false
+            });
+
+            var buffer = Encoding.UTF8.GetBytes(json);
+            var segment = new ArraySegment<byte>(buffer);
+
+            await webSocket.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+
+        private async Task SendRoomData(WebSocket webSocket, int id)
+        {
+            var roomData = await _context.RoomData.FindAsync(id);
+            var mappedRoomData = RoomDataDto.MapFromRoom(roomData);
+
+            var json = JsonSerializer.Serialize(mappedRoomData, new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 WriteIndented = false
@@ -35,13 +54,41 @@ namespace M241.Server.Controllers
 
 
         [Route("/api/RoomDatas/ws")]
-        public async Task GetWebsocket()
+        public async Task GetRooms()
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
                 WebSocketConnectionManager.Sockets.Add(webSocket);
                 await SendRoomData(webSocket);
+                // Keep listening to keep connection alive
+                var buffer = new byte[1024 * 4];
+                while (webSocket.State == WebSocketState.Open)
+                {
+                    var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    if (result.MessageType == WebSocketMessageType.Close)
+                    {
+                        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by client", CancellationToken.None);
+                    }
+                }
+
+                // Remove on disconnect (optional but cleaner)
+                WebSocketConnectionManager.Sockets.TryTake(out var _);
+            }
+            else
+            {
+                HttpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+            }
+        }
+
+        [Route("/api/RoomDatas/ws/{id}")]
+        public async Task GetRoomById(int id)
+        {
+            if (HttpContext.WebSockets.IsWebSocketRequest)
+            {
+                var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+                WebSocketConnectionManager.Sockets.Add(webSocket);
+                await SendRoomData(webSocket, id);
                 // Keep listening to keep connection alive
                 var buffer = new byte[1024 * 4];
                 while (webSocket.State == WebSocketState.Open)
