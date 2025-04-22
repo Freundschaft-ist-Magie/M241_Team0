@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace M241.Server.Controllers
 {
@@ -53,6 +54,14 @@ namespace M241.Server.Controllers
                 ModelState.AddModelError(error.Code, error.Description);
 
             return BadRequest(ModelState);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(e => e.Id == id);
+            var result = _context.Users.Remove(user);
+            return Ok();
         }
     }
 
