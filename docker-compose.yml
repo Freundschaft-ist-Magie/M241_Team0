@@ -29,7 +29,7 @@ services:
   dns:
     build: ./M241.DNS
     environment:
-      - TOKEN=${TOKEN:admin}
+      - TOKEN=${TOKEN:-admin}
     volumes:
       - mosquitto_data:/mosquitto/data
       - mosquitto_log:/mosquitto/log
