@@ -3,6 +3,7 @@
 @using M241.Server.Data.Models
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<AeroSenseDbContext> contextFactory
+@inject DialogService DialogService
 <PageTitle>Dashboard</PageTitle>
 <h3>Rooms</h3>
 
@@ -18,6 +19,7 @@ Data="@RoomDatas" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperat
     </Columns>
 </RadzenDataGrid>
 <Statstic RoomDatas="StatisticRoomDatas" />
+<RadzenButton ButtonStyle="ButtonStyle.Danger" Click="ResetDatabase">Reset Database</RadzenButton>
 
 @code {
     List<RoomData> RoomDatas { get; set; }
@@ -27,5 +29,17 @@ Data="@RoomDatas" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperat
         using var context = await contextFactory.CreateDbContextAsync();
         RoomDatas = await context.RoomData.ToListAsync();
         StatisticRoomDatas = RoomDatas.Take(100).ToList();
+    }
+
+    async Task ResetDatabase(){
+        var result = await DialogService.Confirm("Datenbank komplett zurücksetzen?", "Löschen", new ConfirmOptions() { OkButtonText = "Ja", CancelButtonText = "Nein" });
+        if(result != null && result == true){
+            using var context = await contextFactory.CreateDbContextAsync();
+            context.RoomData.RemoveRange(context.RoomData);
+            context.Rooms.RemoveRange(context.Rooms);
+            context.SaveChanges();
+            RoomDatas = new();
+            StatisticRoomDatas = new();
+        }
     }
 }
