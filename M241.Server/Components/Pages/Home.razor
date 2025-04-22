@@ -20,12 +20,12 @@ Data="@RoomDatas" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperat
 <Statstic RoomDatas="StatisticRoomDatas" />
 
 @code {
-    IQueryable<RoomData> RoomDatas { get; set; }
+    List<RoomData> RoomDatas { get; set; }
     List<RoomData> StatisticRoomDatas { get; set; } = new();
     protected override async Task OnInitializedAsync()
     {
         using var context = await contextFactory.CreateDbContextAsync();
-        RoomDatas = context.RoomData;
-        StatisticRoomDatas = await RoomDatas.Take(100).ToListAsync();
+        RoomDatas = await context.RoomData.ToListAsync();
+        StatisticRoomDatas = RoomDatas.Take(100).ToList();
     }
 }
