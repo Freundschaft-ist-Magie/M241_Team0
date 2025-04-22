@@ -26,15 +26,6 @@ services:
     ports:
       - 1883:1883
       - 9002:9001
-  dns:
-    build: ./M241.DNS
-    environment:
-      - TOKEN=${TOKEN:admin}
-    volumes:
-      - mosquitto_data:/mosquitto/data
-      - mosquitto_log:/mosquitto/log
-    ports:
-      - 8090:8080
 volumes:
   m241_db:
   mosquitto_data:
