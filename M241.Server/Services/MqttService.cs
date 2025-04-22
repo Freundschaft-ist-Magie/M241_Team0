@@ -13,8 +13,9 @@ namespace M241.Server.Services
         private IMqttClient _client;
         private MqttClientOptions _options;
         private readonly IServiceProvider _serviceProvider;
+        ILogger<MqttService> _logger;
 
-        public MqttService(IServiceProvider serviceProvider, IConfiguration configuration)
+        public MqttService(IServiceProvider serviceProvider, IConfiguration configuration, ILogger<MqttService> logger)
         {
             _serviceProvider = serviceProvider;
             _client = new MqttClientFactory().CreateMqttClient();
@@ -24,13 +25,15 @@ namespace M241.Server.Services
                 .WithCredentials(configuration["MQTT:user"], configuration["MQTT:password"])
                 .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
                 .Build();
+
+            _logger = logger;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             _client.ConnectedAsync += async e =>
             {
-                Console.WriteLine("✅ Connected to MQTT Broker");
+                _logger.LogInformation("✅ Connected to MQTT Broker");
 
                 await _client.SubscribeAsync("room/data");
             };
@@ -38,7 +41,7 @@ namespace M241.Server.Services
             _client.ApplicationMessageReceivedAsync += async e =>
             {
                 var payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
-                Console.WriteLine($"📩 MQTT message: {payload}");
+                _logger.LogInformation($"📩 MQTT message: {payload}");
 
                 try
                 {
@@ -60,14 +63,23 @@ namespace M241.Server.Services
                         context.RoomData.Add(roomData.MapToRoomData(room));
                         await context.SaveChangesAsync();
                     }
-                    var response = await _client.ConnectAsync(_options, cancellationToken);
-                    Console.WriteLine("MQTT Result {0}", response.ResultCode);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"❌ Error: {ex.Message}");
+                    _logger.LogError($"❌ Error: {ex.Message}");
                 }
             };
+
+            try
+            {
+                var response = await _client.ConnectAsync(_options, cancellationToken);
+                _logger.LogInformation("MQTT Result {0}", response.ResultCode);
+            }
+            catch(Exception e)
+            {
+                _logger.LogError("MQTT connection could not be established. Ex: {0}", e);
+            }
+
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
