@@ -31,53 +31,5 @@ namespace M241.Server.Common.Dtos
 
         [JsonPropertyName("isBurning")]
         public bool IsBurning { get; set; }
-
-        public static RoomDataDto MapFromRoom(RoomData roomData)
-        {
-            return new RoomDataDto
-            {
-                Id = roomData.Id,
-                Humidity = roomData.Humidity,
-                Pressure = roomData.Pressure,
-                Room = roomData.Room,
-                Gas = roomData.Gas,
-                Temperature = roomData.Temperature,
-                TimeStamp = roomData.TimeStamp,
-            };
-        }
-
-        public static List<RoomDataDto> MapFromRooms(List<RoomData> roomDatas)
-        {
-            List<RoomDataDto> mappedRooms = new();
-
-            foreach (var roomData in roomDatas) {
-                mappedRooms.Add(new RoomDataDto
-                {
-                    Id = roomData.Id,
-                    Humidity = roomData.Humidity,
-                    Pressure = roomData.Pressure,
-                    Room = roomData.Room,
-                    Gas = roomData.Gas,
-                    Temperature = roomData.Temperature,
-                    TimeStamp = roomData.TimeStamp,
-                });
-            }
-
-            return mappedRooms;
-        }
-
-        public RoomData MapToRoomData(Room room)
-        {
-            return new RoomData
-            {
-                Id = Id,
-                Humidity = Humidity,
-                Pressure = Pressure,
-                Room = room,
-                Gas = Gas,
-                Temperature = Temperature,
-                TimeStamp = DateTime.Now.ToUniversalTime(),
-            };
-        }
     }
 }

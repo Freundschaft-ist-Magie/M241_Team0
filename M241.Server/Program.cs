@@ -1,3 +1,4 @@
+using AutoMapper;
 using M241.Server;
 using M241.Server.Components;
 using M241.Server.Data;
@@ -34,6 +35,11 @@ builder.Services.AddIdentityApiEndpoints<AppUser>()
     .AddEntityFrameworkStores<AeroSenseDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
+
+builder.Services.AddTransient(provider => new MapperConfiguration(cfg =>
+{
+    cfg.AddProfile(new MappingProfile());
+}).CreateMapper());
 
 builder.Services.AddTransient<AeroSenseDbContext>();
 builder.Services.AddHostedService<MqttService>();

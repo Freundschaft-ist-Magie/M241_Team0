@@ -6,22 +6,26 @@ using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Concurrent;
 using M241.Server.Common.Dtos;
+using AutoMapper;
+using Radzen.Blazor.Rendering;
 
 namespace M241.Server.Controllers
 {
     public class WebSocketController : ControllerBase
     {
         private readonly AeroSenseDbContext _context;
+        private readonly IMapper _mapper;
 
-        public WebSocketController(AeroSenseDbContext context)
+        public WebSocketController(AeroSenseDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         private async Task SendRoomData(WebSocket webSocket)
         {
             var roomDataList = await _context.RoomData.ToListAsync();
-            var mappedRoomData = RoomDataDto.MapFromRooms(roomDataList);
+            var mappedRoomData = _mapper.Map<List<RoomDataDto>>(roomDataList);
 
             var json = JsonSerializer.Serialize(mappedRoomData, new JsonSerializerOptions
             {
@@ -38,7 +42,7 @@ namespace M241.Server.Controllers
         private async Task SendRoomData(WebSocket webSocket, int id)
         {
             var roomData = await _context.RoomData.FindAsync(id);
-            var mappedRoomData = RoomDataDto.MapFromRoom(roomData);
+            var mappedRoomData = _mapper.Map<RoomDataDto>(roomData);
 
             var json = JsonSerializer.Serialize(mappedRoomData, new JsonSerializerOptions
             {
