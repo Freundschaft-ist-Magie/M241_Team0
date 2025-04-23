@@ -16,6 +16,7 @@ namespace M241.Server.Services
         private MqttClientOptions _options;
         private readonly IServiceProvider _serviceProvider;
         ILogger<MqttService> _logger;
+        bool isUpdatingSockets = false;
 
         public MqttService(IServiceProvider serviceProvider, IConfiguration configuration, ILogger<MqttService> logger)
         {
@@ -93,18 +94,30 @@ namespace M241.Server.Services
 
         private async Task UpdateSockets(AeroSenseDbContext context)
         {
-            var roomDataList = await context.RoomData.ToListAsync();
-            var json = JsonSerializer.Serialize(roomDataList);
-
-            var buffer = Encoding.UTF8.GetBytes(json);
-            var segment = new ArraySegment<byte>(buffer);
-
-            foreach (var socket in WebSocketConnectionManager.Sockets)
+            if (isUpdatingSockets) return;
+            isUpdatingSockets = true;
+            try
             {
-                if (socket.State == WebSocketState.Open)
+                var roomDataList = await context.RoomData.ToListAsync();
+                var json = JsonSerializer.Serialize(roomDataList);
+
+                var buffer = Encoding.UTF8.GetBytes(json);
+                var segment = new ArraySegment<byte>(buffer);
+
+                foreach (var socket in WebSocketConnectionManager.Sockets)
                 {
-                    await socket.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
+                    if (socket.State == WebSocketState.Open)
+                    {
+                        await socket.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Failed to update message {e.Message}", e);
+            }finally 
+            { 
+                isUpdatingSockets = false; 
             }
         }
     }
