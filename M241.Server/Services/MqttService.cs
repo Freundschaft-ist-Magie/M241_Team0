@@ -1,8 +1,10 @@
 ﻿using M241.Server.Common.Dtos;
+using M241.Server.Controllers;
 using M241.Server.Data;
 using M241.Server.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using MQTTnet;
+using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 
@@ -62,6 +64,7 @@ namespace M241.Server.Services
 
                         context.RoomData.Add(roomData.MapToRoomData(room));
                         await context.SaveChangesAsync();
+                        await UpdateSockets(context);
                     }
                 }
                 catch (Exception ex)
@@ -86,6 +89,23 @@ namespace M241.Server.Services
         {
             if (_client.IsConnected)
                 await _client.DisconnectAsync();
+        }
+
+        private async Task UpdateSockets(AeroSenseDbContext context)
+        {
+            var roomDataList = await context.RoomData.ToListAsync();
+            var json = JsonSerializer.Serialize(roomDataList);
+
+            var buffer = Encoding.UTF8.GetBytes(json);
+            var segment = new ArraySegment<byte>(buffer);
+
+            foreach (var socket in WebSocketConnectionManager.Sockets)
+            {
+                if (socket.State == WebSocketState.Open)
+                {
+                    await socket.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
+                }
+            }
         }
     }
 }
