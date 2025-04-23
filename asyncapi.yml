@@ -1,0 +1,113 @@
+asyncapi: 3.0.0
+id: 'Team0:AirCheck'
+info:
+  title: AirCheck Sensor API
+  version: 1.0.0
+  description: >-
+    This API describes the interface between the AirCheck backend as the consumer
+    and its arbitrary publisher.
+  contact:
+    email: jo.zeller@protonmail.com
+    name: Johannes Zeller
+    url: 'http://linkedin.com/in/johannes-zeller-5610432b1'
+  license:
+    name: MIT
+  tags:
+    - name: Documentation
+      description: Our repository's ReadMe
+      externalDocs:
+        url: 'https://github.com/Freundschaft-ist-Magie/M241_Team0/blob/main/README.md'
+defaultContentType: application/json
+servers:
+  mosquitto:
+    host: 'rpi.m241.api64.de:1883'
+    protocol: mqtt
+    description: >-
+      Mosquitto stores the messages that can be consumed by the AirCheck backend. In
+      case the backend is not available, the messages will be stored until they are
+      consumed.
+    security:
+      - $ref: '#/components/securitySchemes/messageBrokerCreds'
+channels:
+  sensorData:
+    address: 'room/data'
+    messages:
+      sendMessage.message.roomData:
+        $ref: '#/components/messages/RoomData'
+      receiveMessage.message.roomData:
+        $ref: '#/components/messages/RoomData'
+operations:
+  sendMessage:
+    action: receive
+    channel:
+      $ref: '#/channels/sensorData'
+    summary: Arbitrary publisher sends message
+    description: An arbitrary publisher can send a room's sensor data to the queue.
+    messages:
+      - $ref: '#/channels/sensorData/messages/sendMessage.message.roomData'
+  receiveMessage:
+    action: send
+    channel:
+      $ref: '#/channels/sensorData'
+    summary: AirCheck backend consumes message
+    description: The AirCheck backend can consume the sensor data from the queue.
+    messages:
+      - $ref: '#/channels/sensorData/messages/receiveMessage.message.roomData'
+components:
+  securitySchemes:
+    messageBrokerCreds:
+      type: userPassword
+      description: Credentials required for connection to Mosquitto
+  messages:
+    RoomData:
+      name: RoomData
+      description: >-
+        Message containing arbitrary publisher's sensor data which is thus submitted
+        for creation at AirCheck
+      payload:
+        $ref: '#/components/schemas/RoomData'
+  schemas:
+    RoomData:
+      type: object
+      description: >-
+        Sensor data which also includes the publisher's Mac address which is
+        used for identification at AirCheck. A new Room record will automatically
+        be created if a new Mac address is provided here.
+      required:
+        - macAddress
+        - temperature
+        - humidity
+        - pressure
+        - gas
+      properties:
+        macAddress:
+          type: string
+          description: Mac address of the arbitrary publisher
+          minLength: 17
+          maxLength: 17
+          examples:
+            - 'd8:3a:dd:6d:7f:03'
+        temperature:
+          type: number
+          format: float
+          description: The temperature in *C
+          examples:
+            - 25.51
+        humidity:
+          type: number
+          format: float
+          description: The humidity in RH %
+          examples:
+            - 35.84
+        pressure:
+          type: number
+          format: int32
+          description: The pressure in Pa
+          examples:
+            - 95758
+        gas:
+          type: number
+          format: int32
+          description: The gas resistance in Ohms
+          examples:
+            - 56960 Ohms
