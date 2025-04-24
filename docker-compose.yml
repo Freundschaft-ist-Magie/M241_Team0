@@ -34,3 +34,4 @@ volumes:
   m241_db:
   mosquitto_data:
   mosquitto_log:
+  pgadmin_data:
