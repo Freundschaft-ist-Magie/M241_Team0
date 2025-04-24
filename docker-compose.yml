@@ -15,6 +15,10 @@ services:
       - "8081:80"
     depends_on:
         - mosquitto
+  m241.frontend:
+    build: ./M241.Frontend
+    ports:
+      - 3000:80
   mosquitto:
     build: ./M241.Broker
     environment:
