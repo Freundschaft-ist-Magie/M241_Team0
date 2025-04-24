@@ -16,7 +16,7 @@ services:
     depends_on:
         - mosquitto
   m241.frontend:
-    build: ./M241.Frontend
+    image: jzeladminbbzw2006/aircheck-frontend
     ports:
       - 3000:80
   mosquitto:
