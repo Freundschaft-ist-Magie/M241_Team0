@@ -93,7 +93,7 @@ namespace M241.Server.Controllers
             }
             _context.RoomData.Add(roomData.MapToRoomData(room));
             await _context.SaveChangesAsync();
-            await UpdateSockets();
+            await UpdateSockets(roomData.MapToRoomData(room));
 
             return CreatedAtAction("GetRoomData", new { id = roomData.Id }, roomData);
         }
@@ -119,10 +119,9 @@ namespace M241.Server.Controllers
             return _context.RoomData.Any(e => e.Id == id);
         }
 
-        private async Task UpdateSockets()
+        private async Task UpdateSockets(RoomData latestRoomData)
         {
-            var roomDataList = await _context.RoomData.ToListAsync();
-            var json = JsonSerializer.Serialize(roomDataList);
+            var json = JsonSerializer.Serialize(latestRoomData);
 
             var buffer = Encoding.UTF8.GetBytes(json);
             var segment = new ArraySegment<byte>(buffer);

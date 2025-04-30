@@ -65,7 +65,7 @@ namespace M241.Server.Services
 
                         context.RoomData.Add(roomData.MapToRoomData(room));
                         await context.SaveChangesAsync();
-                        await UpdateSockets(context);
+                        await UpdateSockets(context, roomData.MapToRoomData(room));
                     }
                 }
                 catch (Exception ex)
@@ -92,14 +92,13 @@ namespace M241.Server.Services
                 await _client.DisconnectAsync();
         }
 
-        private async Task UpdateSockets(AeroSenseDbContext context)
+        private async Task UpdateSockets(AeroSenseDbContext context, RoomData latestRoomData)
         {
             if (isUpdatingSockets) return;
             isUpdatingSockets = true;
             try
             {
-                var roomDataList = await context.RoomData.ToListAsync();
-                var json = JsonSerializer.Serialize(roomDataList);
+                var json = JsonSerializer.Serialize(latestRoomData);
 
                 var buffer = Encoding.UTF8.GetBytes(json);
                 var segment = new ArraySegment<byte>(buffer);
