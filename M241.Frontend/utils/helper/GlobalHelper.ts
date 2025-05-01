@@ -42,6 +42,9 @@ class GlobalHelper {
   public static MapAirQuality(airQuality: number) {
     const { title, icon, unit, normalRange, criticalText } = config.airQuality;
 
+    // value is in ohm we need to convert it in kiloohm
+    airQuality = airQuality / 1000;
+
     return this.MapData(airQuality, {
       title,
       icon,
@@ -53,6 +56,9 @@ class GlobalHelper {
 
   public static MapPressure(pressure: number) {
     const { title, icon, unit, normalRange, criticalText } = config.pressure;
+
+    // value is in Pa we need to convert it in hPa
+    pressure = pressure / 100;
 
     return this.MapData(pressure, {
       title,

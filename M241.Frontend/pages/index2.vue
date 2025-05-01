@@ -128,6 +128,10 @@ function processFetchedData(allRoomData: RoomData[]) {
  * Updates component state and triggers UI refreshes efficiently.
  */
 function handleWebSocketMessage(newData: RoomData) {
+  // DEBUG-Test
+  console.log(`[WS] Received data for room ${newData.roomId}:`, newData);
+  console.log("Selected room:", selectedRoom.value?.roomId);
+
   if (!selectedRoom.value || String(newData.roomId) !== selectedRoom.value.roomId) {
     console.warn(
       `[WS] Received data for room ${newData.roomId}, but room ${selectedRoom.value?.roomId} is selected. Ignoring.`
@@ -337,25 +341,47 @@ onMounted(async () => {
 // ----- WebSocket Subscription -----
 
 function subscribeToRoom(roomId: string) {
-  const newEndpoint = `${import.meta.env.VITE_API_URL}/api/roomDatas/${roomId}/ws`;
+  const newEndpoint = `/RoomDatas/ws/${roomId}`;
 
   unsubscribeFromCurrentRoom();
 
   currentWsCallback = (data: any) => {
-    if (typeof data === "object" && data !== null && "roomId" in data) {
-      const roomData = new RoomData(
-        data.id ?? 0,
-        data.humidity ?? 0,
-        data.temperature ?? 0,
-        data.pressure ?? 0,
-        data.gas ?? 0,
-        data.timeStamp ?? new Date().toISOString(),
-        data.roomId ?? 0
-      );
-      handleWebSocketMessage(roomData);
-    } else {
-      console.warn("[WS] Received unexpected data format:", data);
+    if (!data || typeof data !== "object") {
+      console.warn("[WS] Invalid data received:", data);
+      return;
     }
+
+    // Validate required fields exist and are of correct type
+    const requiredFields = {
+      id: "number",
+      humidity: "number",
+      temperature: "number",
+      pressure: "number",
+      gas: "number",
+      timeStamp: "string",
+      roomId: "number",
+    };
+
+    const isValid = Object.entries(requiredFields).every(
+      ([field, type]) => field in data && typeof data[field] === type
+    );
+
+    if (!isValid) {
+      console.warn("[WS] Data missing required fields or invalid types:", data);
+      return;
+    }
+
+    const roomData = new RoomData(
+      data.id,
+      data.humidity,
+      data.temperature,
+      data.pressure,
+      data.gas,
+      data.timeStamp,
+      data.roomId
+    );
+
+    handleWebSocketMessage(roomData);
   };
 
   console.log(`[WS] Subscribing to ${newEndpoint}`);
@@ -390,16 +416,16 @@ watch(
     if (newRoom?.roomId !== oldRoom?.roomId) {
       console.log(`Selected room changed from ${oldRoom?.roomId} to ${newRoom?.roomId}`);
 
-      // 1. Unsubscribe from the old room's WebSocket stream
+      // Unsubscribe happens inside subscribeToRoom, but calling it here for clarity
       unsubscribeFromCurrentRoom();
 
-      // 2. Update Cards and (re)initialize Charts for the new room
       setCards();
       initializeCharts();
 
-      // 3. Subscribe to the new room's WebSocket stream if a new room is selected
       if (newRoom) {
         subscribeToRoom(newRoom.roomId);
+      } else {
+        unsubscribeFromCurrentRoom();
       }
     }
   },
