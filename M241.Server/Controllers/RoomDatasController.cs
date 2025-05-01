@@ -20,10 +20,12 @@ namespace M241.Server.Controllers
     public class RoomDatasController : ControllerBase
     {
         private readonly AeroSenseDbContext _context;
+        private readonly ILogger<RoomDatasController> _logger;
 
-        public RoomDatasController(AeroSenseDbContext context)
+        public RoomDatasController(AeroSenseDbContext context, ILogger<RoomDatasController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: api/RoomDatas
@@ -94,7 +96,7 @@ namespace M241.Server.Controllers
             }
             _context.RoomData.Add(roomData.MapToRoomData(room));
             await _context.SaveChangesAsync();
-            await WebSocketService.UpdateSockets(roomData.MapToRoomData(room));
+            await WebSocketService.UpdateSockets(roomData.MapToRoomData(room), _logger);
 
             return CreatedAtAction("GetRoomData", new { id = roomData.Id }, roomData);
         }

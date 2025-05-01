@@ -12,21 +12,6 @@ namespace M241.Server.Services
     {
         private static bool isUpdatingSockets;
         public static ConcurrentBag<WebSocket> Sockets = new();
-        public static async Task UpdateSockets(RoomData latestRoomData)
-        {
-            var json = JsonSerializer.Serialize(latestRoomData);
-
-            var buffer = Encoding.UTF8.GetBytes(json);
-            var segment = new ArraySegment<byte>(buffer);
-
-            foreach (var socket in Sockets)
-            {
-                if (socket.State == WebSocketState.Open)
-                {
-                    await socket.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
-                }
-            }
-        }
 
         public static async Task UpdateSockets(RoomData latestRoomData, ILogger _logger)
         {
