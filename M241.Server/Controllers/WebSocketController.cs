@@ -8,6 +8,7 @@ using System.Collections.Concurrent;
 using M241.Server.Common.Dtos;
 using AutoMapper;
 using Radzen.Blazor.Rendering;
+using M241.Server.Services;
 
 namespace M241.Server.Controllers
 {
@@ -63,7 +64,7 @@ namespace M241.Server.Controllers
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                WebSocketConnectionManager.Sockets.Add(webSocket);
+                WebSocketService.Sockets.Add(webSocket);
                 await SendRoomData(webSocket);
                 // Keep listening to keep connection alive
                 var buffer = new byte[1024 * 4];
@@ -77,7 +78,7 @@ namespace M241.Server.Controllers
                 }
 
                 // Remove on disconnect (optional but cleaner)
-                WebSocketConnectionManager.Sockets.TryTake(out var _);
+                WebSocketService.Sockets.TryTake(out var _);
             }
             else
             {
@@ -91,7 +92,7 @@ namespace M241.Server.Controllers
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                WebSocketConnectionManager.Sockets.Add(webSocket);
+                WebSocketService.Sockets.Add(webSocket);
                 await SendRoomData(webSocket, id);
                 // Keep listening to keep connection alive
                 var buffer = new byte[1024 * 4];
@@ -105,7 +106,7 @@ namespace M241.Server.Controllers
                 }
 
                 // Remove on disconnect (optional but cleaner)
-                WebSocketConnectionManager.Sockets.TryTake(out var _);
+                WebSocketService.Sockets.TryTake(out var _);
             }
             else
             {
@@ -113,10 +114,5 @@ namespace M241.Server.Controllers
             }
         }
 
-    }
-
-    public static class WebSocketConnectionManager
-    {
-        public static ConcurrentBag<WebSocket> Sockets = new();
     }
 }

@@ -11,6 +11,7 @@ using M241.Server.Common.Dtos;
 using System.Net.WebSockets;
 using System.Text.Json;
 using System.Text;
+using M241.Server.Services;
 
 namespace M241.Server.Controllers
 {
@@ -93,7 +94,7 @@ namespace M241.Server.Controllers
             }
             _context.RoomData.Add(roomData.MapToRoomData(room));
             await _context.SaveChangesAsync();
-            await UpdateSockets(roomData.MapToRoomData(room));
+            await WebSocketService.UpdateSockets(roomData.MapToRoomData(room));
 
             return CreatedAtAction("GetRoomData", new { id = roomData.Id }, roomData);
         }
@@ -117,22 +118,6 @@ namespace M241.Server.Controllers
         private bool RoomDataExists(int id)
         {
             return _context.RoomData.Any(e => e.Id == id);
-        }
-
-        private async Task UpdateSockets(RoomData latestRoomData)
-        {
-            var json = JsonSerializer.Serialize(latestRoomData);
-
-            var buffer = Encoding.UTF8.GetBytes(json);
-            var segment = new ArraySegment<byte>(buffer);
-
-            foreach (var socket in WebSocketConnectionManager.Sockets)
-            {
-                if (socket.State == WebSocketState.Open)
-                {
-                    await socket.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
-                }
-            }
         }
     }
 }

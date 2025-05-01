@@ -65,7 +65,7 @@ namespace M241.Server.Services
 
                         context.RoomData.Add(roomData.MapToRoomData(room));
                         await context.SaveChangesAsync();
-                        await UpdateSockets(context, roomData.MapToRoomData(room));
+                        await WebSocketService.UpdateSockets(roomData.MapToRoomData(room), _logger);
                     }
                 }
                 catch (Exception ex)
@@ -90,34 +90,6 @@ namespace M241.Server.Services
         {
             if (_client.IsConnected)
                 await _client.DisconnectAsync();
-        }
-
-        private async Task UpdateSockets(AeroSenseDbContext context, RoomData latestRoomData)
-        {
-            if (isUpdatingSockets) return;
-            isUpdatingSockets = true;
-            try
-            {
-                var json = JsonSerializer.Serialize(latestRoomData);
-
-                var buffer = Encoding.UTF8.GetBytes(json);
-                var segment = new ArraySegment<byte>(buffer);
-
-                foreach (var socket in WebSocketConnectionManager.Sockets)
-                {
-                    if (socket.State == WebSocketState.Open)
-                    {
-                        await socket.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.LogError($"Failed to update message {e.Message}", e);
-            }finally 
-            { 
-                isUpdatingSockets = false; 
-            }
         }
     }
 }
