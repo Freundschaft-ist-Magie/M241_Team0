@@ -36,10 +36,10 @@
   "airQuality": {
     "title": "Luftqualität",
     "icon": "mdi:air-filter",
-    "unit": "kΩ",
+    "unit": "Ω",
     "normalRange": {
-      "low": 100,
-      "high": 1000
+      "low": 100000,
+      "high": 1000000
     },
     "criticalText": {
       "high": "Die Luftqualität ist ungewöhnlich gut. Könnte fast zu schön sein, um wahr zu sein.",
@@ -50,10 +50,10 @@
   "pressure": {
     "title": "Luftdruck",
     "icon": "mdi:gauge",
-    "unit": "hPa",
+    "unit": "Pa",
     "normalRange": {
-      "low": 950,
-      "high": 1050
+      "low": 95000,
+      "high": 105000
     },
     "criticalText": {
       "low": "Der Luftdruck ist ungewöhnlich niedrig. Dies könnte auf schlechtes Wetter oder einen Sturm hindeuten.",
