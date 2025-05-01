@@ -1,0 +1,28 @@
+{
+  "editor.formatOnSave": true,
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "tsconfig.json": "tsconfig.*.json, vite.config.ts",
+    ".env": ".env.example",
+    "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml",
+    "eslint.config.mjs": ".eslintignore, .eslintrc.cjs",
+    "tailwind.config.js": "postcss.config.js",
+    "nuxt.config.ts": "postcss.config.js",
+    "Dockerfile": "docker-compose.yml, .dockerignore",
+  },
+  "files.exclude": {
+    "node_modules": true,
+    ".gitignore": true,
+    ".nuxt": true,
+    ".output": true,
+    ".vscode": true
+  },
+  "eslint.useFlatConfig": true,
+  "eslint.format.enable": true,
+  "eslint.codeAction.disableRuleComment": {
+    "enable": false
+  },
+  "eslint.options": {
+    "overrideConfigFile": ".config/eslint.config.mjs"
+  }
+}
