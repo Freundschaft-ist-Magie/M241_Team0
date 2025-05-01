@@ -42,8 +42,8 @@ namespace M241.Server.Controllers
 
         private async Task SendRoomData(WebSocket webSocket, int id)
         {
-            var roomData = await _context.RoomData.FindAsync(id);
-            var mappedRoomData = _mapper.Map<RoomDataDto>(roomData);
+            var roomDatas = await _context.RoomData.Where(r => r.RoomId == id).ToListAsync();
+            var mappedRoomData = _mapper.Map<List<RoomDataDto>>(roomDatas);
 
             var json = JsonSerializer.Serialize(mappedRoomData, new JsonSerializerOptions
             {
