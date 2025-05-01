@@ -1,9 +1,6 @@
 services:
   m241.server:
-    image: ${DOCKER_REGISTRY-}m241server
-    build:
-      context: .
-      dockerfile: M241.Server/Dockerfile
+    image: jzeladminbbzw2006/aircheck-backend
     environment:
       - ConnectionStrings__Default=Host=postgres;Port=5432;Database=m241;Username=dbuser;Password=admin;
       - ASPNETCORE_ENVIRONMENT=Release
