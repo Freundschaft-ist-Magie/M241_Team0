@@ -14,7 +14,7 @@ jobs:
       - name: Build and push backend Docker image
         uses: docker/build-push-action@v6
         with:
-          context: ./M241.Server
+          context: .
           file: ./M241.Server/Dockerfile
           push: true
           tags: jzeladminbbzw2006/aircheck-backend
