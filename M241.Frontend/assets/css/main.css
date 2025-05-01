@@ -1,0 +1,46 @@
+@import 'primeicons/primeicons.css';
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-primary1: #0060B9;
+  --color-primary2: #193EBD;
+  --color-secondary1: #E5F0FF;
+  --color-secondary2: #D9E3F2;
+  --color-accent1: #AFD8F5;
+  --color-accent2: #9DC4F5;
+  --color-neutral1: #FFFFFF;
+  --color-neutral2: #141A22;
+  --color-gray1: #A7A7A7;
+  --color-gray2: #D2D2D2;
+
+  /* Dark Mode Colors */
+  --color-darkPrimary1: #0077E5;
+  --color-darkPrimary2: #004F98;
+  --color-darkSecondary1: #E5F0FF;
+  --color-darkSecondary2: #BBBBBB;
+  --color-darkAccent1: #2F3D50;
+  --color-darkAccent2: #546D90;
+  --color-darkNeutral1: #141A22;
+  --color-darkNeutral2: #FFFFFF;
+
+  /* Shadows */
+  --text-shadow-sm: 0 1px 2px var(--tw-shadow-color);
+  --text-shadow: 0 2px 4px var(--tw-shadow-color);
+  --text-shadow-lg: 0 8px 16px var(--tw-shadow-color);
+  --text-shadow-outline: 2px 2px 0 var(--tw-shadow-color), 2px -2px 0 var(--tw-shadow-color),
+    -2px 2px 0 var(--tw-shadow-color), -2px -2px 0 var(--tw-shadow-color),
+    2px 0px 0 var(--tw-shadow-color), 0px 2px 0 var(--tw-shadow-color),
+    -2px 0px 0 var(--tw-shadow-color), 0px -2px 0 var(--tw-shadow-color),
+    2px 2px 20px rgba(255, 165, 0, 0);
+
+  /* Easing Functions */
+  --ease-fluid: cubic-bezier(0.3, 0, 0, 1);
+  --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* disable margin on primevue selector */
+.p-select-label {
+  margin: 0 !important;
+  padding: 0 !important;
+}

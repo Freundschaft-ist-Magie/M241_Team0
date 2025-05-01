@@ -1,0 +1,65 @@
+{
+  "appName": "Air Check",
+  "teamName": "Team:0",
+  "Version": "1.0.0",
+  "countdown": {
+    "timerSeconds": 30
+  },
+  "temperature": {
+    "title": "Temperatur",
+    "icon": "mdi:thermometer-low",
+    "unit": "°C",
+    "normalRange": {
+      "low": 18,
+      "high": 27
+    },
+    "criticalText": {
+      "low": "Die Temperatur ist zu niedrig. Überprüfen Sie die Heizquelle oder schliessen Sie die Fenster.",
+      "high": "Die Temperatur ist zu hoch. Lüften Sie den Raum oder prüfen Sie die Klimatisierung."
+    },
+    "chartColor": "#3357FF"
+  },
+  "humidity": {
+    "title": "Luftfeuchtigkeit",
+    "icon": "mdi:water-percent",
+    "unit": "%",
+    "normalRange": {
+      "low": 40,
+      "high": 60
+    },
+    "criticalText": {
+      "low": "Die Luftfeuchtigkeit ist zu niedrig. Ein Luftbefeuchter könnte helfen.",
+      "high": "Die Luftfeuchtigkeit ist an der oberen Grenze. Bei weiterem Anstieg lüften, um Schimmelbildung vorzubeugen."
+    },
+    "chartColor": "#3357FF"
+  },
+  "airQuality": {
+    "title": "Luftqualität",
+    "icon": "mdi:air-filter",
+    "unit": "Ω",
+    "normalRange": {
+      "low": 100000,
+      "high": 1000000
+    },
+    "criticalText": {
+      "high": "Die Luftqualität ist ungewöhnlich gut. Könnte fast zu schön sein, um wahr zu sein.",
+      "low": "Die Luftqualität ist schlecht. Lüften Sie den Raum, um die Luftqualität zu verbessern."
+    },
+    "chartColor": "#3357FF"
+  },
+  "pressure": {
+    "title": "Luftdruck",
+    "icon": "mdi:gauge",
+    "unit": "Pa",
+    "normalRange": {
+      "low": 95000,
+      "high": 105000
+    },
+    "criticalText": {
+      "low": "Der Luftdruck ist ungewöhnlich niedrig. Dies könnte auf schlechtes Wetter oder einen Sturm hindeuten.",
+      "high": "Der Luftdruck ist sehr hoch. Dies könnte auf stabiles, aber eventuell drückendes Wetter hindeuten."
+    },
+    "chartColor": "#3357FF"
+  },
+  "forecastColor": "#000"
+}

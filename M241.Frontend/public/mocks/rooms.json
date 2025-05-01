@@ -1,0 +1,257 @@
+[
+  {
+    "id": 1,
+    "name": "Room 1",
+    "description": "This is room 1",
+    "environmentData": {
+      "temperature": [
+        {
+          "value": "12.5",
+          "timestamp": "2023-10-01T10:00:00Z"
+        },
+        {
+          "value": "28",
+          "timestamp": "2023-10-01T11:00:00Z"
+        },
+        {
+          "value": "33",
+          "timestamp": "2023-10-01T12:00:00Z"
+        },
+        {
+          "value": "35",
+          "timestamp": "2023-10-01T13:00:00Z"
+        },
+        {
+          "value": "34",
+          "timestamp": "2023-10-01T14:00:00Z"
+        },
+        {
+          "value": "32",
+          "timestamp": "2023-10-01T15:00:00Z"
+        }
+      ],
+      "humidity": [
+        {
+          "value": "87",
+          "timestamp": "2023-10-01T10:00:00Z"
+        },
+        {
+          "value": "33",
+          "timestamp": "2023-10-01T11:00:00Z"
+        },
+        {
+          "value": "69",
+          "timestamp": "2023-10-01T12:00:00Z"
+        },
+        {
+          "value": "70",
+          "timestamp": "2023-10-01T13:00:00Z"
+        },
+        {
+          "value": "65",
+          "timestamp": "2023-10-01T14:00:00Z"
+        },
+        {
+          "value": "60",
+          "timestamp": "2023-10-01T15:00:00Z"
+        }
+      ],
+      "airQuality": [
+        {
+          "value": "400",
+          "timestamp": "2023-10-01T10:00:00Z"
+        },
+        {
+          "value": "767",
+          "timestamp": "2023-10-01T11:00:00Z"
+        },
+        {
+          "value": "254",
+          "timestamp": "2023-10-01T12:00:00Z"
+        },
+        {
+          "value": "200",
+          "timestamp": "2023-10-01T13:00:00Z"
+        },
+        {
+          "value": "350",
+          "timestamp": "2023-10-01T14:00:00Z"
+        },
+        {
+          "value": "420",
+          "timestamp": "2023-10-01T15:00:00Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "name": "Room 2",
+    "description": "This is room 2",
+    "environmentData": {
+      "temperature": [
+        {
+          "value": "23.0",
+          "timestamp": "2023-10-01T10:00:00Z"
+        },
+        {
+          "value": "23.1",
+          "timestamp": "2023-10-01T11:00:00Z"
+        },
+        {
+          "value": "23.2",
+          "timestamp": "2023-10-01T12:00:00Z"
+        },
+        {
+          "value": "23.4",
+          "timestamp": "2023-10-01T13:00:00Z"
+        },
+        {
+          "value": "23.5",
+          "timestamp": "2023-10-01T14:00:00Z"
+        },
+        {
+          "value": "23.6",
+          "timestamp": "2023-10-01T15:00:00Z"
+        }
+      ],
+      "humidity": [
+        {
+          "value": "50",
+          "timestamp": "2023-10-01T10:00:00Z"
+        },
+        {
+          "value": "52",
+          "timestamp": "2023-10-01T11:00:00Z"
+        },
+        {
+          "value": "55",
+          "timestamp": "2023-10-01T12:00:00Z"
+        },
+        {
+          "value": "58",
+          "timestamp": "2023-10-01T13:00:00Z"
+        },
+        {
+          "value": "60",
+          "timestamp": "2023-10-01T14:00:00Z"
+        },
+        {
+          "value": "62",
+          "timestamp": "2023-10-01T15:00:00Z"
+        }
+      ],
+      "airQuality": [
+        {
+          "value": "420",
+          "timestamp": "2023-10-01T10:00:00Z"
+        },
+        {
+          "value": "430",
+          "timestamp": "2023-10-01T11:00:00Z"
+        },
+        {
+          "value": "440",
+          "timestamp": "2023-10-01T12:00:00Z"
+        },
+        {
+          "value": "460",
+          "timestamp": "2023-10-01T13:00:00Z"
+        },
+        {
+          "value": "470",
+          "timestamp": "2023-10-01T14:00:00Z"
+        },
+        {
+          "value": "480",
+          "timestamp": "2023-10-01T15:00:00Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "name": "Room 3",
+    "description": "This is room 3",
+    "environmentData": {
+      "temperature": [
+        {
+          "value": "24.0",
+          "timestamp": "2023-10-01T10:00:00Z"
+        },
+        {
+          "value": "24.1",
+          "timestamp": "2023-10-01T11:00:00Z"
+        },
+        {
+          "value": "24.2",
+          "timestamp": "2023-10-01T12:00:00Z"
+        },
+        {
+          "value": "24.4",
+          "timestamp": "2023-10-01T13:00:00Z"
+        },
+        {
+          "value": "24.5",
+          "timestamp": "2023-10-01T14:00:00Z"
+        },
+        {
+          "value": "24.6",
+          "timestamp": "2023-10-01T15:00:00Z"
+        }
+      ],
+      "humidity": [
+        {
+          "value": "55",
+          "timestamp": "2023-10-01T10:00:00Z"
+        },
+        {
+          "value": "57",
+          "timestamp": "2023-10-01T11:00:00Z"
+        },
+        {
+          "value": "60",
+          "timestamp": "2023-10-01T12:00:00Z"
+        },
+        {
+          "value": "62",
+          "timestamp": "2023-10-01T13:00:00Z"
+        },
+        {
+          "value": "64",
+          "timestamp": "2023-10-01T14:00:00Z"
+        },
+        {
+          "value": "66",
+          "timestamp": "2023-10-01T15:00:00Z"
+        }
+      ],
+      "airQuality": [
+        {
+          "value": "440",
+          "timestamp": "2023-10-01T10:00:00Z"
+        },
+        {
+          "value": "450",
+          "timestamp": "2023-10-01T11:00:00Z"
+        },
+        {
+          "value": "460",
+          "timestamp": "2023-10-01T12:00:00Z"
+        },
+        {
+          "value": "470",
+          "timestamp": "2023-10-01T13:00:00Z"
+        },
+        {
+          "value": "480",
+          "timestamp": "2023-10-01T14:00:00Z"
+        },
+        {
+          "value": "490",
+          "timestamp": "2023-10-01T15:00:00Z"
+        }
+      ]
+    }
+  }
+]
