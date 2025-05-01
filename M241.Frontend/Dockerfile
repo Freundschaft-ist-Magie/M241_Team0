@@ -12,7 +12,7 @@ RUN npm i
 
 # Copy the entire project
 COPY . ./
-RUN echo "VITE_API_URL=\"localhost:8081\"" > ./.env
+RUN echo "VITE_API_URL=\"rpi.m241.api64.de:8081\"" > ./.env
 RUN echo "VITE_API_ENDPOINT_PREFIX=\"api/\"" >> ./.env
 
 # Build the project
