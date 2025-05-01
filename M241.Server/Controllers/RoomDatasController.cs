@@ -84,21 +84,23 @@ namespace M241.Server.Controllers
         // POST: api/RoomDatas
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<RoomData>> PostRoomData(CreateRoomDataDto roomData)
+        public async Task<ActionResult<RoomData>> PostRoomData(CreateRoomDataDto createRoomData)
         {
-            var room = await _context.Rooms.FirstOrDefaultAsync(c => c.MACAddress == roomData.MACAddress);
+            var room = await _context.Rooms.FirstOrDefaultAsync(c => c.MACAddress == createRoomData.MACAddress);
             if(room is null)
             {
                 room = new Room()
                 {
-                    MACAddress = roomData.MACAddress,
+                    MACAddress = createRoomData.MACAddress,
                 };
             }
-            _context.RoomData.Add(roomData.MapToRoomData(room));
+            var roomData = createRoomData.MapToRoomData(room);
+            _context.RoomData.Add(roomData);
             await _context.SaveChangesAsync();
-            await WebSocketService.UpdateSockets(roomData.MapToRoomData(room), _logger);
+            var newRoom = await _context.RoomData.FindAsync(roomData.Id);
+            await WebSocketService.UpdateSockets(newRoom, _logger);
 
-            return CreatedAtAction("GetRoomData", new { id = roomData.Id }, roomData);
+            return CreatedAtAction("GetRoomData", new { id = newRoom.Id }, newRoom);
         }
 
         // DELETE: api/RoomDatas/5

@@ -63,9 +63,11 @@ namespace M241.Server.Services
                             };
                         }
 
-                        context.RoomData.Add(roomData.MapToRoomData(room));
+                        var newRoomData = roomData.MapToRoomData(room);
+                        context.RoomData.Add(newRoomData);
                         await context.SaveChangesAsync();
-                        await WebSocketService.UpdateSockets(roomData.MapToRoomData(room), _logger);
+                        var newRoom = await context.RoomData.FindAsync(newRoomData.Id);
+                        await WebSocketService.UpdateSockets(newRoomData, _logger);
                     }
                 }
                 catch (Exception ex)
