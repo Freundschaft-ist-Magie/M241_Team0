@@ -40,6 +40,8 @@ let currentWsEndpoint: string | null = null;
 type MessageCallback = (data: any) => void;
 let currentWsCallback: MessageCallback | null = null;
 
+const lastChartUpdate = ref<Date | null>(null);
+
 const latestFetch = ref<Date>(new Date(1, 1, 1970));
 const selectedRoom = ref<DisplayRoom | null>(null);
 const rooms = ref<DisplayRoom[]>([]);
@@ -49,7 +51,7 @@ const charts = ref<{ data: ChartData; options: ChartOptions }[]>([]);
 const chartTitles = ref([
   "Temperatur (letzte Daten)",
   "Luftfeuchtigkeit (letzte Daten)",
-  "CO₂ Level (letzte Daten)",
+  "Luftqualität (letzte Daten)",
   "Luftdruck (letzte Daten)",
 ]);
 const tabs = ref([
@@ -112,6 +114,7 @@ function processFetchedData(allRoomData: RoomData[]) {
     pressure: latest.pressure,
     gas: latest.gas,
     timeStamp: latest.timeStamp,
+    room: latest.room
   }));
 
   displayRooms.sort((a, b) => a.roomId.localeCompare(b.roomId));
@@ -384,6 +387,7 @@ function subscribeToRoom(roomId: string) {
       gas: "number",
       timeStamp: "string",
       roomId: "number",
+      room: "object",
     };
 
     const isValid = Object.entries(requiredFields).every(
@@ -402,7 +406,8 @@ function subscribeToRoom(roomId: string) {
       data.pressure,
       data.gas,
       data.timeStamp,
-      data.roomId
+      data.roomId,
+      data.room
     );
 
     handleWebSocketMessage(roomData);

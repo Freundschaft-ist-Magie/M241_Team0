@@ -12,6 +12,7 @@ using System.Net.WebSockets;
 using System.Text.Json;
 using System.Text;
 using M241.Server.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace M241.Server.Controllers
 {

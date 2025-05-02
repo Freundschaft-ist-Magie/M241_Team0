@@ -9,6 +9,7 @@ using M241.Server.Common.Dtos;
 using AutoMapper;
 using Radzen.Blazor.Rendering;
 using M241.Server.Services;
+using System.Net.Sockets;
 
 namespace M241.Server.Controllers
 {
@@ -63,8 +64,9 @@ namespace M241.Server.Controllers
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
+                var newSocketId = Guid.NewGuid().ToString();
                 var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                WebSocketService.Sockets.Add(webSocket);
+                WebSocketService.Sockets.TryRemove(newSocketId, out var _);
                 await SendRoomData(webSocket);
                 // Keep listening to keep connection alive
                 var buffer = new byte[1024 * 4];
@@ -78,7 +80,7 @@ namespace M241.Server.Controllers
                 }
 
                 // Remove on disconnect (optional but cleaner)
-                WebSocketService.Sockets.TryTake(out var _);
+                WebSocketService.Sockets.TryRemove(newSocketId, out var _);
             }
             else
             {
@@ -92,7 +94,7 @@ namespace M241.Server.Controllers
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                WebSocketService.Sockets.Add(webSocket);
+                WebSocketService.Sockets.TryAdd(id.ToString(), webSocket);
                 await SendRoomData(webSocket, id);
                 // Keep listening to keep connection alive
                 var buffer = new byte[1024 * 4];
@@ -106,7 +108,7 @@ namespace M241.Server.Controllers
                 }
 
                 // Remove on disconnect (optional but cleaner)
-                WebSocketService.Sockets.TryTake(out var _);
+                WebSocketService.Sockets.TryRemove(id.ToString(), out var _);
             }
             else
             {

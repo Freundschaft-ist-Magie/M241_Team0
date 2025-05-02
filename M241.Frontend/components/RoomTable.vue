@@ -18,7 +18,8 @@ const filteredRoomData = computed(() => {
   return data.map((entry, index) => ({
     id: index + 1,
     ...entry
-  }));
+  })).reverse();
+
 });
 </script>
 
