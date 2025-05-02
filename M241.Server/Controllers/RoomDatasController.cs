@@ -29,12 +29,22 @@ namespace M241.Server.Controllers
         }
 
         // GET: api/RoomDatas
-        [HttpGet("{maxPageSize?}")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<RoomData>>> GetRoomData(int? maxPageSize)
         {
             if(maxPageSize != null)
             {
-                return await _context.RoomData.Include(r => r.Room).OrderByDescending(r => r.TimeStamp).Take(maxPageSize.Value).ToListAsync();
+                var roomDatas = await _context.RoomData
+                    .Include(r => r.Room)
+                    .ToListAsync();
+
+                var limitedRoomDatas = roomDatas
+                    .GroupBy(r => r.RoomId)
+                    .SelectMany(g => g
+                        .OrderByDescending(r => r.TimeStamp)
+                        .Take(maxPageSize.Value))
+                    .ToList();
+                return limitedRoomDatas;
             }
             return await _context.RoomData.Include(r => r.Room).ToListAsync();
         }

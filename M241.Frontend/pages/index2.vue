@@ -469,16 +469,7 @@ onUnmounted(() => {
   </div>
 
   <!-- Fallback 1: No Rooms -->
-  <div
-    v-else-if="!hasRooms"
-    class="mt-10 p-6 border border-dashed border-gray-400 rounded-lg bg-gray-50 text-center"
-  >
-    <h2 class="text-xl font-semibold text-gray-700 mb-2">Keine Räume verfügbar</h2>
-    <p class="text-gray-500">
-      Es wurden keine Raumdaten empfangen oder es sind aktuell keine Sensoren aktiv. Warte
-      auf Daten vom Server...
-    </p>
-  </div>
+  <NoRooms v-else-if="!hasRooms" />
 
   <!-- Main content -->
   <div v-else id="main-content">
@@ -518,17 +509,7 @@ onUnmounted(() => {
     <!-- Data Display Area -->
     <div v-if="selectedRoom" class="mt-4">
       <!-- Fallback 2: No History Data for the selected room -->
-      <div
-        v-if="!hasHistoryDataForSelectedRoom"
-        class="p-4 border border-dashed border-yellow-400 rounded-lg bg-yellow-50 dark:bg-yellow-900/50 text-center"
-      >
-        <p class="text-yellow-700 dark:text-yellow-300">
-          Für den Raum "{{ selectedRoom.roomId }}" liegen derzeit keine Verlaufsdaten vor.
-        </p>
-        <p class="text-yellow-600 dark:text-yellow-400 text-sm mt-1">
-          Diagramme und Tabelle werden angezeigt, sobald Daten verfügbar sind.
-        </p>
-      </div>
+      <NoCharts v-if="!hasHistoryDataForSelectedRoom" :selectedRoom="selectedRoom" />
 
       <!-- Display Table and Charts -->
       <div v-else>
