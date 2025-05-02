@@ -1,7 +1,5 @@
-name: CI
+name: CI frontend
 on:
-  push:
-  pull_request:
   workflow_dispatch:
 jobs:
   build:
@@ -13,10 +11,10 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and push Docker image
+      - name: Build and push frontend Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: ./Dockerfile
+          context: ./M241.Frontend
+          file: ./M241.Frontend/Dockerfile
           push: true
           tags: jzeladminbbzw2006/aircheck-frontend
