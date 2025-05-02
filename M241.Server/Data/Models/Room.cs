@@ -6,6 +6,9 @@ namespace M241.Server.Data.Models
     {
         [JsonPropertyName("id")]
         public int Id { get; set; }
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+
         [JsonPropertyName("macAddress")]
         public string MACAddress { get; set; } = string.Empty;
         [JsonPropertyName("isBurning")]
