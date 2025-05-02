@@ -30,7 +30,7 @@ function handleRoomSelected(room: Room) {
 
 <template>
   <div
-    class="mt-4 p-4 bg-white shadow-md shadow-black/40 rounded-md flex justify-between items-center"
+    class="mt-4 p-4 bg-white shadow-md shadow-black/40 rounded-md flex justify-between items-center dark:bg-darkNeutral1 dark:text-darkNeutral2"
   >
     <div>
       <RoomSelector
@@ -40,8 +40,10 @@ function handleRoomSelected(room: Room) {
         :selectedRoom="selectedRoom"
         @roomSelected="handleRoomSelected"
       />
-      <p class="text-gray-500">Zuletzt aktualisiert: {{ formatDate(latestFetch) }}</p>
-      <p v-if="countdown >= 0" class="text-gray-400 text-sm">
+      <p class="text-gray-500 dark:text-darkSecondary2">
+        Zuletzt aktualisiert: {{ formatDate(latestFetch) }}
+      </p>
+      <p v-if="countdown >= 0" class="text-gray-400 text-sm dark:text-darkSecondary2">
         Charts werden aktualisiert in {{ countdown }} Sekunden.
       </p>
     </div>
