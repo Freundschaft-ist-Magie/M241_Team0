@@ -49,7 +49,7 @@ string frontendUrl = builder.Configuration["FrontendUrl"] ??
 
 
 builder.Services.AddCors(options => options.AddPolicy("SPA", policy => policy
-    .WithOrigins(frontendUrl)
+    .WithOrigins(frontendUrl, "http://localhost")
     .AllowAnyMethod()
     .AllowAnyHeader()
     .AllowCredentials()));

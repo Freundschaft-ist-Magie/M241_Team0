@@ -13,10 +13,6 @@ services:
     depends_on:
       - mosquitto
       - postgres
-  m241.frontend:
-    image: jzeladminbbzw2006/aircheck-frontend
-    ports:
-      - 3000:80
   mosquitto:
     build: ./M241.Broker
     environment:
@@ -38,15 +34,7 @@ services:
       - POSTGRES_PASSWORD=admin
       - POSTGRES_USER=dbuser
       - POSTGRES_DB=m241
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - m241.server
-      - m241.frontend
+
 volumes:
   m241_db:
   mosquitto_data:

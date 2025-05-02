@@ -66,7 +66,7 @@ namespace M241.Server.Services
                         var newRoomData = roomData.MapToRoomData(room);
                         context.RoomData.Add(newRoomData);
                         await context.SaveChangesAsync();
-                        var newRoom = await context.RoomData.FindAsync(newRoomData.Id);
+                        var newRoom = await context.RoomData.Include(r => r.Room).FirstOrDefaultAsync(n => n.Id == newRoomData.Id);
                         await WebSocketService.UpdateSockets(newRoomData, _logger);
                     }
                 }

@@ -47,7 +47,7 @@ const panelLinks = computed(() => {
 
 const checkServerHealth = async () => {
   try {
-    const response = await fetch(`http://${import.meta.env.VITE_API_URL}/healthz`);
+    const response = await fetch(`${import.meta.env.VITE_API_PROTOCOL}${import.meta.env.VITE_API_URL}/healthz`);
     if (response.ok) {
       const text = await response.text();
       isServerOnline.value = text.toLowerCase().includes("healthy");
