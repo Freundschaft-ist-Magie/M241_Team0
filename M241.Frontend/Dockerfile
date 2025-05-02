@@ -14,7 +14,8 @@ RUN npm i
 COPY . ./
 RUN echo "VITE_API_URL=\"rpi.m241.api64.de\"" > ./.env
 RUN echo "VITE_API_ENDPOINT_PREFIX=\"api/\"" >> ./.env
-RUN echo "VITE_VITE_API_PROTOCOL=\"https://\"" >> ./.env
+RUN echo "VITE_API_PROTOCOL=\"https://\"" >> ./.env
+RUN echo "VITE_API_WSPROTOCOL=\"wss://\"" >> ./.env
 
 # Build the project
 RUN NODE_OPTIONS=--max-old-space-size=2048 npm run build
