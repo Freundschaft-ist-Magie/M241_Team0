@@ -9,5 +9,5 @@ services:
       - "443:443"
     volumes:
       - ./nginx.secure.conf:/etc/nginx/nginx.conf:ro
-      - ${CERT:-/etc/ssl/rpi.m241.api64.de.crt}:/etc/ssl/rpi.crt:ro
-      - ${CERT_CERT:-/etc/ssl/private/rpi.m241.api64.de.key}:/etc/ssl/private/rpi.key:ro
+      - /etc/ssl/rpi.m241.api64.de.crt:/etc/ssl/rpi.crt:ro
+      - /etc/ssl/private/rpi.m241.api64.de.key:/etc/ssl/private/rpi.key:ro
