@@ -62,7 +62,7 @@
     "chartColor": "#3357FF"
   },
   "compGas": {
-    "title": "Luftqualität",
+    "title": "Luftqualität (Kompensationswert)",
     "icon": "mdi:clouds",
     "unit": "",
     "normalRange": {
