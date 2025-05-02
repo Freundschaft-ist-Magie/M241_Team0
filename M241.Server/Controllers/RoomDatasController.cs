@@ -29,9 +29,13 @@ namespace M241.Server.Controllers
         }
 
         // GET: api/RoomDatas
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<RoomData>>> GetRoomData()
+        [HttpGet("{maxPageSize}")]
+        public async Task<ActionResult<IEnumerable<RoomData>>> GetRoomData(int? maxPageSize)
         {
+            if(maxPageSize != null)
+            {
+                return await _context.RoomData.Include(r => r.Room).OrderByDescending(r => r.TimeStamp).Take(maxPageSize.Value).ToListAsync();
+            }
             return await _context.RoomData.Include(r => r.Room).ToListAsync();
         }
 
