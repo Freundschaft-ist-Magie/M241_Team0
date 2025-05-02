@@ -29,7 +29,7 @@ namespace M241.Server.Controllers
         }
 
         // GET: api/RoomDatas
-        [HttpGet("{maxPageSize}")]
+        [HttpGet("{maxPageSize?}")]
         public async Task<ActionResult<IEnumerable<RoomData>>> GetRoomData(int? maxPageSize)
         {
             if(maxPageSize != null)
