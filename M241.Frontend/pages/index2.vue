@@ -261,9 +261,16 @@ function setCards() {
   const cardHumidity = GlobalHelper.MapHumidity(room.humidity);
   const cardAirQuality = GlobalHelper.MapAirQuality(room.gas);
   const cardPressure = GlobalHelper.MapPressure(room.pressure);
+  const cardCompGas = GlobalHelper.MapCompGas(room.gas, room.humidity);
 
   if (cardTemperature.value !== undefined) {
-    cards.value = [cardTemperature, cardHumidity, cardAirQuality, cardPressure];
+    cards.value = [
+      cardTemperature,
+      cardHumidity,
+      cardAirQuality,
+      cardPressure,
+      cardCompGas,
+    ];
   }
 }
 
