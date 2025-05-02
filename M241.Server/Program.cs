@@ -5,6 +5,7 @@ using M241.Server.Data;
 using M241.Server.Data.Models;
 using M241.Server.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -78,6 +79,16 @@ app.UseCors("SPA");
 app.MapControllers();
 app.MapGroup("/api")
     .MapIdentityApi<AppUser>();
+app.MapPost("/api/logout", async (SignInManager<AppUser> signInManager,
+    [FromBody] object empty) =>
+{
+    if (empty != null)
+    {
+        await signInManager.SignOutAsync();
+        return Results.Ok();
+    }
+    return Results.Unauthorized();
+});
 
 
 app.UseAntiforgery();

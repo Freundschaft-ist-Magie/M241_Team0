@@ -8,11 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using M241.Server.Data;
 using M241.Server.Data.Models;
 using M241.Server.Common.Dtos;
+using Microsoft.AspNetCore.Authorization;
 
 namespace M241.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles="Admin")]
     public class RoomsController : ControllerBase
     {
         private readonly AeroSenseDbContext _context;
