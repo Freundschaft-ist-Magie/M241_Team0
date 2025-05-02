@@ -49,7 +49,7 @@ const charts = ref<{ data: ChartData; options: ChartOptions }[]>([]);
 const chartTitles = ref([
   "Temperatur (letzte Daten)",
   "Luftfeuchtigkeit (letzte Daten)",
-  "CO₂ Level (letzte Daten)",
+  "Luftqualität (letzte Daten)",
   "Luftdruck (letzte Daten)",
 ]);
 const tabs = ref([
@@ -483,7 +483,7 @@ onUnmounted(() => {
     <!-- Statistic Cards -->
     <div
       v-if="selectedRoom"
-      class="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-center"
+      class="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-center"
     >
       <StatisticCard
         v-for="card in cards"

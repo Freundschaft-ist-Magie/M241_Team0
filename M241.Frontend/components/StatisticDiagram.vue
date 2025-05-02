@@ -11,8 +11,12 @@ defineProps<{
 </script>
 
 <template>
-  <div class="bg-white p-4 shadow-md shadow-black/40 rounded-md">
-    <h3 class="font-bold text-primary2 text-center">{{ title }}</h3>
+  <div
+    class="bg-white dark:bg-darkNeutral1 p-4 shadow-md shadow-black/40 rounded-md text-black dark:text-darkNeutral2"
+  >
+    <h3 class="font-bold text-primary2 dark:text-darkPrimary1 text-center">
+      {{ title }}
+    </h3>
     <Chart :type="chartType" :data="chartData" :options="chartOptions" />
   </div>
 </template>
