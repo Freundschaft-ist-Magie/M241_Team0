@@ -18,7 +18,6 @@ namespace M241.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class RoomDatasController : ControllerBase
     {
         private readonly AeroSenseDbContext _context;

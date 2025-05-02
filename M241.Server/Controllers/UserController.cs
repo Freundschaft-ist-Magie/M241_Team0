@@ -11,7 +11,6 @@ namespace M241.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;

@@ -14,7 +14,6 @@ namespace M241.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles="Admin")]
     public class RoomsController : ControllerBase
     {
         private readonly AeroSenseDbContext _context;
