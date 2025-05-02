@@ -49,7 +49,7 @@ const charts = ref<{ data: ChartData; options: ChartOptions }[]>([]);
 const chartTitles = ref([
   "Temperatur (letzte Daten)",
   "Luftfeuchtigkeit (letzte Daten)",
-  "CO₂ Level (letzte Daten)",
+  "Luftqualität (letzte Daten)",
   "Luftdruck (letzte Daten)",
 ]);
 const tabs = ref([
