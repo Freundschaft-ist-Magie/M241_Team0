@@ -70,11 +70,10 @@ class GlobalHelper {
   }
 
   public static MapCompGas(gasResistance: number, humidity: number) {
-    const gas_resistance_reading = gasResistance / 1000; // Convert to kiloohm
     const { title, icon, unit, normalRange, criticalText } = config.compGas;
 
     // value is in Pa we need to convert it in hPa
-    const compGas = Math.log(gas_resistance_reading) + 0.04 * humidity
+    const compGas = Math.log(gasResistance) + 0.04 * humidity
 
     return this.MapData(compGas, {
       title,
