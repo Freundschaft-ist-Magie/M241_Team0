@@ -101,19 +101,33 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-gray-100 p-4 flex items-center justify-center min-h-screen">
-    <div class="mt-4 p-6 bg-white shadow-lg rounded-lg w-full max-w-md">
+  <div
+    class="bg-gray-100 dark:bg-darkNeutral1 p-4 flex items-center justify-center min-h-screen"
+  >
+    <div
+      class="mt-4 p-6 bg-white dark:bg-darkAccent1 shadow-lg rounded-lg w-full max-w-md text-black dark:text-darkNeutral2"
+    >
       <div class="flex justify-center mb-4">
-        <i class="pi pi-user text-primary1" style="font-size: 3rem"></i>
+        <i
+          class="pi pi-user text-primary1 dark:text-darkPrimary1"
+          style="font-size: 3rem"
+        ></i>
       </div>
 
-      <h2 class="text-center text-2xl text-gray-800 font-semibold mb-6">Login</h2>
+      <h2
+        class="text-center text-2xl text-gray-800 dark:text-darkNeutral2 font-semibold mb-6"
+      >
+        Login
+      </h2>
 
       <form @submit.prevent="handleLogin" class="flex flex-col gap-4">
         <div>
-          <label for="email_label" class="block text-sm font-medium text-gray-700 mb-1"
-            >E-Mail</label
+          <label
+            for="email_label"
+            class="block text-sm font-medium text-gray-700 dark:text-darkSecondary2 mb-1"
           >
+            E-Mail
+          </label>
           <InputText
             type="email"
             id="email_label"
@@ -125,7 +139,6 @@ onMounted(() => {
             placeholder="max.mustermann@muster.com"
             aria-describedby="email-error"
           />
-
           <small
             v-if="emailError"
             id="email-error"
@@ -136,9 +149,12 @@ onMounted(() => {
         </div>
 
         <div>
-          <label for="password_label" class="block text-sm font-medium text-gray-700 mb-1"
-            >Passwort</label
+          <label
+            for="password_label"
+            class="block text-sm font-medium text-gray-700 dark:text-darkSecondary2 mb-1"
           >
+            Passwort
+          </label>
           <Password
             id="password_label"
             v-model="password"
@@ -151,7 +167,6 @@ onMounted(() => {
             :invalid="!!passwordError"
             aria-describedby="password-error"
           />
-
           <small
             v-if="passwordError"
             id="password-error"
@@ -162,7 +177,10 @@ onMounted(() => {
         </div>
 
         <div class="flex justify-end">
-          <NuxtLink to="/forgot-password" class="text-sm text-primary1 hover:underline">
+          <NuxtLink
+            to="/forgot-password"
+            class="text-sm text-primary1 dark:text-darkPrimary1 hover:underline"
+          >
             Passwort vergessen?
           </NuxtLink>
         </div>
