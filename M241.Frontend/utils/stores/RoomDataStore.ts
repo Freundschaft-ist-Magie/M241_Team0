@@ -3,7 +3,7 @@ import { get } from "~/utils/services/base/ApiService";
 import RoomData from "~/models/RoomData";
 
 export const useRoomDataStore = defineStore("roomData", () => {
-  const _roomBaseUrl = "RoomDatas";
+  const _roomBaseUrl = "RoomDatas?maxPageSize=20";
   const _roomDatas = ref([])
   const roomDatas = computed(() => _roomDatas);
 

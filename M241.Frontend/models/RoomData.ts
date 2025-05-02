@@ -17,7 +17,8 @@ class RoomData {
     pressure: number,
     gas: number,
     timeStamp: string,
-    roomId: number
+    roomId: number,
+    room: object
   ) {
     this.id = id;
     this.humidity = humidity;
@@ -26,7 +27,7 @@ class RoomData {
     this.gas = gas;
     this.timeStamp = timeStamp;
     this.roomId = roomId;
-    this.room = null;
+    this.room = room;
   }
 }
 

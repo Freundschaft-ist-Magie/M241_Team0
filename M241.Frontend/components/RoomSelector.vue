@@ -54,16 +54,16 @@ onMounted(() => {
     <template #value="slotProps">
       <div v-if="slotProps.value" class="flex items-center">
         <div class="text-3xl font-bold text-black dark:text-darkNeutral2">
-          Room {{ slotProps.value.roomId }}
+          Room {{ slotProps.value.room.macAddress }}
         </div>
       </div>
       <span v-else class="text-3xl font-bold text-black dark:text-darkNeutral2">
-        {{ options && options.length > 0 ? "Room " + options[0].roomId : "No data" }}
+        {{ options && options.length > 0 ? "Room " + options[0].room.macAddress : "No data" }}
       </span>
     </template>
     <template #option="slotProps">
       <div class="flex items-center text-black dark:text-darkNeutral2">
-        Room {{ slotProps.option.roomId }}
+        Room {{ slotProps.option.room.macAddress }}
       </div>
     </template>
   </Select>
