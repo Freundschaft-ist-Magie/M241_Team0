@@ -365,7 +365,7 @@ function subscribeToRoom(roomId: string) {
     }
 
     if (data[0]) {
-      data = data[0]
+      data = data[0];
     }
 
     // Validate required fields exist and are of correct type

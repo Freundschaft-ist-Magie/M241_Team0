@@ -1,9 +1,13 @@
 <script lang="ts" setup>
 import { useAuthStore } from "@/utils/stores/base/AuthStore";
+import { usePageSettingsStore } from "@/utils/stores/base/PageSettingsStore";
 
 const authStore = useAuthStore();
+const pageSettingsStore = usePageSettingsStore();
 
-const layout = authStore.isAuthenticated ? "default" : "not-logged-in";
+onMounted(() => {
+  pageSettingsStore.initialize();
+});
 </script>
 
 <template>

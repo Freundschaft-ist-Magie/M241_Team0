@@ -1,7 +1,10 @@
 <script lang="ts" setup>
 import { useAuthStore } from "~/utils/stores/base/AuthStore";
+import { usePageSettingsStore } from "~/utils/stores/base/PageSettingsStore";
 
 const authStore = useAuthStore();
+const pageSettingsStore = usePageSettingsStore();
+
 const navLinksPanel = ref();
 const notifPanel = ref();
 const serverStatusPopover = ref();
@@ -68,7 +71,7 @@ onMounted(() => {
 
 <template>
   <div
-    class="bg-gray2 p-4 flex justify-between items-center rounded-md shadow-md shadow-black/40"
+    class="bg-gray2 p-4 flex justify-between items-center rounded-md shadow-md shadow-black/40 dark:bg-darkNeutral1 dark:text-darkNeutral2"
   >
     <Button
       severity="secondary"
@@ -77,12 +80,19 @@ onMounted(() => {
       aria-controls="navLinksPanel"
     >
       <NuxtLink to="/" class="flex justify-center items-center gap-4">
-        <Icon name="mdi:air-conditioner" class="text-4xl text-primary2" />
-        <span class="hidden sm:block text-2xl font-bold text-primary2"> AirCheck </span>
+        <Icon
+          name="mdi:air-conditioner"
+          class="text-4xl text-primary2 dark:text-darkPrimary1"
+        />
+        <span
+          class="hidden sm:block text-2xl font-bold text-primary2 dark:text-darkPrimary1"
+        >
+          AirCheck
+        </span>
       </NuxtLink>
     </Button>
 
-    <div class="flex items-center gap-4 space-x-2 text-black">
+    <div class="flex items-center gap-4 space-x-2 text-black dark:text-darkNeutral2">
       <div class="relative flex gap-2 items-center" @click="toggleServerStatusPopover">
         <svg
           :class="isServerOnline ? 'text-green-500' : 'text-red-500'"
@@ -97,41 +107,20 @@ onMounted(() => {
         <i class="pi pi-question-circle"></i>
       </div>
       <Popover ref="serverStatusPopover">
-        <span class="text-sm text-gray-500">
+        <span class="text-sm text-gray-500 dark:text-darkSecondary2">
           Zeigt an, ob der Server erreichbar ist oder nicht. Ist der Server nicht
           erreichbar, werden die Daten nicht aktualisiert.
         </span>
       </Popover>
 
       <div class="flex gap-2 items-center">
-        <!-- <Button
-          severity="secondary"
-          class="p-0! m-0! bg-transparent! border-0!"
-          @click="toggleNavLinksPanel"
-          aria-haspopup="true"
-          aria-controls="navLinksPanel"
-        >
-          <img
-            class="w-10 h-10 rounded-full"
-            :src="userData.image"
-            :alt="userData.name"
-          />
-          <p class="hidden sm:block">{{ userData.name }}</p>
-        </Button>
+        <Button
+          @click="pageSettingsStore.toggleDarkMode"
+          :icon="pageSettingsStore.isDarkMode ? 'pi pi-sun' : 'pi pi-moon'"
+          :severity="pageSettingsStore.isDarkMode ? 'secondary' : 'secondary'"
+          class="p-button-rounded"
+        />
 
-        <OverlayPanel ref="navLinksPanel" id="navLinksPanel">
-          <div class="flex flex-col gap-2 p-2">
-            <NuxtLink
-              v-for="link in panelLinks"
-              :key="link.to"
-              :to="link.to"
-              class="flex items-center gap-2 text-left hover:bg-gray1/60 px-4 py-2 rounded-md"
-            >
-              <Icon :name="`mdi-light:${link.icon}`" class="w-5 h-5" />
-              <span>{{ link.text }}</span>
-            </NuxtLink>
-          </div>
-        </OverlayPanel> -->
         <Button
           severity="secondary"
           class="p-0! m-0! bg-transparent! border-0!"
@@ -141,10 +130,10 @@ onMounted(() => {
         >
           <NuxtLink
             to="logout"
-            class="flex items-center gap-2 text-left hover:bg-gray1/60 px-4 py-2 rounded-md"
+            class="flex items-center gap-2 text-left hover:bg-gray1/60 dark:hover:bg-darkAccent1/60 px-4 py-2 rounded-md"
           >
-            <Icon name="mdi-light:logout" class="w-5 h-5" />
-            <span>Logout</span>
+            <Icon name="mdi-light:logout" class="w-5 h-5 dark:text-white" />
+            <span class="dark:text-white">Logout</span>
           </NuxtLink>
         </Button>
       </div>
