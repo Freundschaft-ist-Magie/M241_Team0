@@ -29,7 +29,7 @@ namespace M241.Server.Controllers
         }
 
         // GET: api/RoomDatas
-        [HttpGet("{maxPageSize?}")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<RoomData>>> GetRoomData(int? maxPageSize)
         {
             if(maxPageSize != null)
@@ -42,7 +42,7 @@ namespace M241.Server.Controllers
                     .GroupBy(r => r.RoomId)
                     .SelectMany(g => g
                         .OrderByDescending(r => r.TimeStamp)
-                        .Take(50))
+                        .Take(maxPageSize.Value))
                     .ToList();
                 return limitedRoomDatas;
             }
