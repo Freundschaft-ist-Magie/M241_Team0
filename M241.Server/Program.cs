@@ -50,7 +50,7 @@ string frontendUrl = builder.Configuration["FrontendUrl"] ??
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SameSite = SameSiteMode.None;
 });
 
 
