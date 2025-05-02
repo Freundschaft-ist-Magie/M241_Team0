@@ -122,7 +122,7 @@ onMounted(async () => {
   const countdownSeconds = config!.countdown?.timerSeconds || 30; // fallback to 30 if missing
 
   const webSocket = new WebSocket(
-    `ws://${import.meta.env.VITE_API_URL}/api/roomDatas/ws`
+    `${import.meta.env.VITE_API_WSPROTOCOL}${import.meta.env.VITE_API_URL}/api/roomDatas/ws`
   );
 
   webSocket.onmessage = (event) => {
