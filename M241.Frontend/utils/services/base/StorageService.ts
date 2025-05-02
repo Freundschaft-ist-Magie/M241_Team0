@@ -1,5 +1,3 @@
-import { useNuxtApp } from "#app";
-
 class StorageService {
   // Check if we're on client side
   private isClient(): boolean {
@@ -30,4 +28,5 @@ class StorageService {
   }
 }
 
-export default new StorageService();
+const storageService = new StorageService();
+export default storageService;
