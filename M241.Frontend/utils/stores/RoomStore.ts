@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { get } from "~/utils/services/base/ApiService";
+import { get, post, put } from "~/utils/services/base/ApiService";
 import Room from "~/models/Room";
 
 export const useRoomStore = defineStore("room", () => {
@@ -13,5 +13,16 @@ export const useRoomStore = defineStore("room", () => {
     return _rooms;
   }
 
-  return { rooms, GetAll };
+  async function UpdateRoom(room: Room) {
+    // separate id from the room object
+    const id = room.id;
+
+    // update room values
+    const _rooms: Room[] = await put(`${_roomBaseUrl}/${id}`, room);
+
+    return _rooms;
+  }
+
+
+  return { rooms, GetAll, UpdateRoom };
 });
