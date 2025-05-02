@@ -48,6 +48,11 @@ builder.Services.AddHealthChecks();
 string frontendUrl = builder.Configuration["FrontendUrl"] ??
     throw new ArgumentException("Missing frontend url in appsettings.");
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.SameSite = SameSiteMode.Lax;
+});
+
 
 builder.Services.AddCors(options => options.AddPolicy("SPA", policy => policy
     .WithOrigins(frontendUrl, "http://localhost")
