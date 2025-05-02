@@ -31,6 +31,8 @@ var connectionstring = builder.Configuration.GetConnectionString("Default") ?? t
 builder.Services.AddDbContextFactory<AeroSenseDbContext>(opt =>
     opt.UseNpgsql(connectionstring));
 
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<AppUser>()
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AeroSenseDbContext>()
@@ -50,7 +52,7 @@ string frontendUrl = builder.Configuration["FrontendUrl"] ??
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
 
