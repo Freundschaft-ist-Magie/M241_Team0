@@ -33,7 +33,7 @@ class SocketService {
     }
 
     // Use wss:// if the main page is served over https://
-    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const protocol = import.meta.env.VITE_API_WSPROTOCOL;
     const prefix = import.meta.env.VITE_API_ENDPOINT_PREFIX || "";
 
     const cleanPrefix = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
