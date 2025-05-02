@@ -14,8 +14,7 @@ const showEdit = ref(false);
 const editData = ref({
   id: 0,
   name: "",
-  room: "",
-  assigned_user: "",
+  macAddress: "",
 });
 
 // const selectRow = (data: Object) => {
@@ -46,8 +45,7 @@ const editData = ref({
 
 const prefill = (data: Object) => {
   editData.value.name = data.name;
-  editData.value.room = data.room;
-  editData.value.assigned_user = data.assigned_user;
+  editData.value.macAddress = data.macAddress;
   editData.value.id = data.id;
 
   showEdit.value = true;

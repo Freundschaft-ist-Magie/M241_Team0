@@ -20,6 +20,8 @@ export const useRoomStore = defineStore("room", () => {
     // update room values
     const _rooms: Room[] = await put(`${_roomBaseUrl}/${id}`, room);
 
+    console.log("update room to this data", room);
+
     return _rooms;
   }
 
