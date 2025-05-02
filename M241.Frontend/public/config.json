@@ -61,5 +61,19 @@
     },
     "chartColor": "#3357FF"
   },
+  "compGas": {
+    "title": "Luftqualität",
+    "icon": "mdi:clouds",
+    "unit": "",
+    "normalRange": {
+      "low": 5,
+      "high": 20
+    },
+    "criticalText": {
+      "low": "Die Luftqualität ist schlecht. Lüften Sie den Raum, um die Luftqualität zu verbessern.",
+      "high": "Die Luftqualität ist ungewöhnlich gut. Überprüfen sie den Sensor."
+    },
+    "chartColor": "#3357FF"
+  },
   "forecastColor": "#000"
 }

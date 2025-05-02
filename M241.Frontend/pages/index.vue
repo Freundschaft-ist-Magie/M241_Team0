@@ -1,53 +1,62 @@
 <script lang="ts" setup>
 import { useLoadingStore } from "@/utils/stores/base/LoadingStore";
-import { useRoomStore } from "~/utils/stores/RoomStore";
-import RoomsService from "~/utils/services/RoomsService";
-import Room from "~/models/Room";
 import GlobalHelper from "~/utils/helper/GlobalHelper";
 import StatisticCardObj from "~/models/StatisticCardObj";
 import ChartData from "~/models/ChartData";
 import ChartOptions from "~/models/ChartOptions";
-import { getConfig } from "~/utils/helper/ConfigLoader";
+import { useRoomDataStore } from "~/utils/stores/RoomDataStore";
+import { useRoomStore } from "~/utils/stores/RoomStore";
+import SocketService from "~/utils/services/base/SocketService";
+import RoomData from "~/models/RoomData";
 
+// ----- STORE INTEGRATION -----
 const loadingStore = useLoadingStore();
-const roomsStore = useRoomStore();
+const roomStore = useRoomStore();
+const roomDataStore = useRoomDataStore();
 
-const latestFetch = ref(new Date());
-const selectedRoom = ref<Room | null>(null);
-const countdown = ref(0);
-const rooms = ref<Room[]>([]);
-const roomsHistory = ref<
-  Record<
-    string,
-    {
-      timeStamp: string;
-      temperature: number;
-      humidity: number;
-      pressure: number;
-      airQuality: number;
-    }[]
-  >
->({});
+// ----- Interfaces -----
+
+interface DisplayRoom {
+  roomId: string;
+  temperature: number;
+  humidity: number;
+  pressure: number;
+  gas: number;
+  timeStamp: string;
+}
+
+interface ProcessedHistoryEntry {
+  timeStamp: string;
+  temperature: number;
+  humidity: number;
+  pressure: number;
+  airQuality: number;
+}
+
+// ----- COMPONENT LOGIC -----
+
+const socketService = new SocketService();
+let currentWsEndpoint: string | null = null;
+type MessageCallback = (data: any) => void;
+let currentWsCallback: MessageCallback | null = null;
+
+const latestFetch = ref<Date>(new Date(1, 1, 1970));
+const selectedRoom = ref<DisplayRoom | null>(null);
+const rooms = ref<DisplayRoom[]>([]);
+const roomsHistory = ref<Record<string, ProcessedHistoryEntry[]>>({});
 const cards = ref<StatisticCardObj[]>([]);
 const charts = ref<{ data: ChartData; options: ChartOptions }[]>([]);
-const historyCharts = ref<{ data: ChartData; options: ChartOptions }[]>([]);
 const chartTitles = ref([
-  "Temperatur in den letzten 24 h",
-  "Luftfeuchtigkeit in den letzten 24 h",
-  "Luftqualität Level in den letzten 24 h",
-  "Luftdruck in den letzten 24h",
-]);
-const monthChartTitles = ref([
-  "Temperatur in den letzten 30 Tagen",
-  "Luftfeuchtigkeit in den letzten 30 Tagen",
-  "Luftqualität in den letzten 30 Tagen",
-  "Luftdruck in den letzten 30 Tagen",
+  "Temperatur (letzte Daten)",
+  "Luftfeuchtigkeit (letzte Daten)",
+  "CO₂ Level (letzte Daten)",
+  "Luftdruck (letzte Daten)",
 ]);
 const tabs = ref([
-  { title: "Temperatur", value: "0", dayChart: 0, monthChart: 0 },
-  { title: "Luftfeuchtigkeit", value: "1", dayChart: 1, monthChart: 1 },
-  { title: "CO₂ Level", value: "2", dayChart: 2, monthChart: 2 },
-  { title: "Luftdruck", value: "3", dayChart: 3, monthChart: 3 },
+  { title: "Temperatur", value: "0", dayChart: 0 },
+  { title: "Luftfeuchtigkeit", value: "1", dayChart: 1 },
+  { title: "CO₂ Level", value: "2", dayChart: 2 },
+  { title: "Luftdruck", value: "3", dayChart: 3 },
 ]);
 
 loadingStore.setLoading(true);
@@ -56,291 +65,402 @@ const hasRooms = computed(() => rooms.value.length > 0);
 
 const hasHistoryDataForSelectedRoom = computed(() => {
   if (!selectedRoom.value) return false;
-
   const history = roomsHistory.value[selectedRoom.value.roomId];
   return history && history.length > 0;
 });
 
-function startCountdown(countdownSeconds: number) {
-  countdown.value = countdownSeconds;
-  setInterval(() => {
-    countdown.value--;
-    if (countdown.value <= 0) {
-      countdown.value = countdownSeconds;
+// ----- DATA PROCESSING FUNCTIONS -----
+
+/**
+ * Processes raw RoomData[] fetched from the store into structured
+ * history and a list of rooms with their latest data point.
+ */
+function processFetchedData(allRoomData: RoomData[]) {
+  const historyMap: Record<string, ProcessedHistoryEntry[]> = {};
+  const latestDataMap: Record<string, RoomData> = {};
+
+  // Ensure data is sorted by timestamp if not guaranteed by API
+  // Convert string timestamps to Date objects for reliable comparison
+  allRoomData.sort(
+    (a, b) => new Date(a.timeStamp).getTime() - new Date(b.timeStamp).getTime()
+  );
+
+  for (const dataPoint of allRoomData) {
+    const roomIdStr = String(dataPoint.roomId);
+
+    // 1. Build History Map
+    if (!historyMap[roomIdStr]) {
+      historyMap[roomIdStr] = [];
     }
-  }, 1000);
+    historyMap[roomIdStr].push({
+      timeStamp: dataPoint.timeStamp,
+      temperature: dataPoint.temperature,
+      humidity: dataPoint.humidity,
+      pressure: dataPoint.pressure,
+      airQuality: dataPoint.gas,
+    });
+
+    // 2. Track Latest Data Point (since data is sorted, last one wins)
+    latestDataMap[roomIdStr] = dataPoint;
+  }
+
+  // 3. Create DisplayRoom list from latest data
+  const displayRooms: DisplayRoom[] = Object.values(latestDataMap).map((latest) => ({
+    roomId: String(latest.roomId),
+    temperature: latest.temperature,
+    humidity: latest.humidity,
+    pressure: latest.pressure,
+    gas: latest.gas,
+    timeStamp: latest.timeStamp,
+  }));
+
+  displayRooms.sort((a, b) => a.roomId.localeCompare(b.roomId));
+
+  // Update component state
+  rooms.value = displayRooms;
+  roomsHistory.value = historyMap;
+  latestFetch.value = new Date();
 }
 
-function setCards() {
-  cards.value = []; // Clear existing cards first to avoid duplicates if called multiple times
-  if (!selectedRoom.value) return; // Prevent errors if no room is selected
+// ----- WebSocket -----
+/**
+ * Processes a new RoomData object received via WebSocket.
+ * Updates component state and triggers UI refreshes efficiently.
+ */
+function handleWebSocketMessage(newData: RoomData) {
+  // DEBUG-Test
+  console.log(`[WS] Received data for room ${newData.roomId}:`, newData);
+  console.log("Selected room:", selectedRoom.value?.roomId);
 
-  const cardTemperature = GlobalHelper.MapTemperature(selectedRoom.value.temperature);
-  const cardHumidity = GlobalHelper.MapHumidity(selectedRoom.value.humidity);
-  const cardAirQuality = GlobalHelper.MapAirQuality(selectedRoom.value.gas);
-  const cardPressure = GlobalHelper.MapPressure(selectedRoom.value.pressure);
+  if (!selectedRoom.value || String(newData.roomId) !== selectedRoom.value.roomId) {
+    console.warn(
+      `[WS] Received data for room ${newData.roomId}, but room ${selectedRoom.value?.roomId} is selected. Ignoring.`
+    );
+    return;
+  }
+
+  console.log(`[WS] Received data for selected room ${newData.roomId}:`, newData);
+  latestFetch.value = new Date();
+
+  const roomIdStr = String(newData.roomId);
+
+  // 1. Update the 'rooms' array (for RoomSelectorCard display)
+  const roomIndex = rooms.value.findIndex((r) => r.roomId === roomIdStr);
+  if (roomIndex !== -1) {
+    const updatedDisplayRoom: DisplayRoom = {
+      ...rooms.value[roomIndex],
+      temperature: newData.temperature,
+      humidity: newData.humidity,
+      pressure: newData.pressure,
+      gas: newData.gas,
+      timeStamp: newData.timeStamp,
+    };
+    rooms.value.splice(roomIndex, 1, updatedDisplayRoom);
+
+    // Also update the properties of the selectedRoom ref directly.
+    // This is what cards and potentially other parts of the UI bind to.
+    selectedRoom.value.temperature = newData.temperature;
+    selectedRoom.value.humidity = newData.humidity;
+    selectedRoom.value.pressure = newData.pressure;
+    selectedRoom.value.gas = newData.gas;
+    selectedRoom.value.timeStamp = newData.timeStamp;
+  } else {
+    console.warn(
+      `[WS] Received data for room ${roomIdStr}, but it's not in the 'rooms' list.`
+    );
+  }
+
+  // 2. Add new data point to history
+  const historyEntry: ProcessedHistoryEntry = {
+    timeStamp: newData.timeStamp,
+    temperature: newData.temperature,
+    humidity: newData.humidity,
+    pressure: newData.pressure,
+    airQuality: newData.gas,
+  };
+  if (!roomsHistory.value[roomIdStr]) {
+    roomsHistory.value[roomIdStr] = [];
+  }
+  roomsHistory.value[roomIdStr].push(historyEntry);
+  // Optional: Limit history size in memory
+  // const MAX_HISTORY_POINTS = 500;
+  // if (roomsHistory.value[roomIdStr].length > MAX_HISTORY_POINTS) {
+  //   roomsHistory.value[roomIdStr].shift(); // Remove the oldest point
+  // }
+
+  setCards();
+  updateChartsWithNewData(newData);
+}
+
+/**
+ * Updates the existing chart data arrays instead of rebuilding them completely.
+ */
+function updateChartsWithNewData(newData: RoomData) {
+  if (
+    charts.value.length !== 4 ||
+    !selectedRoom.value ||
+    String(newData.roomId) !== selectedRoom.value.roomId
+  ) {
+    console.warn(
+      "[WS] Chart structure not ready or data for wrong room. Skipping direct chart update."
+    );
+
+    return;
+  }
+
+  const newLabel = new Date(newData.timeStamp).toLocaleTimeString();
+
+  const now = Date.now();
+
+  // 30 Sekunden = 30.000 Millisekunden
+  if (now - lastChartUpdate.value < 30_000) {
+    console.log("[Chart] Update übersprungen – noch keine 30 Sekunden vergangen.");
+    return;
+  }
+
+  lastChartUpdate.value = now;
+
+  pushData(0, newLabel, newData.temperature);
+  pushData(1, newLabel, newData.humidity);
+  pushData(2, newLabel, newData.gas);
+  pushData(3, newLabel, newData.pressure);
+}
+
+function pushData(chartIndex: number, label: string, value: number) {
+  const old = charts.value[chartIndex];
+  if (!old) return;
+
+  // Neue Kopien erzeugen (Chart.js braucht das mit PrimeVue!)
+  const newLabels = [...old.data.labels, label];
+  const newData = [...old.data.datasets[0].data, value];
+
+  charts.value[chartIndex] = {
+    data: {
+      labels: newLabels,
+      datasets: [
+        {
+          ...old.data.datasets[0],
+          data: newData,
+        },
+      ],
+    },
+    options: old.options, // Kann gleich bleiben
+  };
+}
+
+// ----- UI UPDATE FUNCTIONS -----
+
+function setCards() {
+  cards.value = [];
+  if (!selectedRoom.value) return;
+
+  const room = selectedRoom.value;
+  console.log("Setting cards for room:", room.roomId);
+
+  const cardTemperature = GlobalHelper.MapTemperature(room.temperature);
+  const cardHumidity = GlobalHelper.MapHumidity(room.humidity);
+  const cardAirQuality = GlobalHelper.MapAirQuality(room.gas);
+  const cardPressure = GlobalHelper.MapPressure(room.pressure);
+  const cardCompGas = GlobalHelper.MapCompGas(room.gas, room.humidity);
 
   if (cardTemperature.value !== undefined) {
-    // Vorhandene Karten ersetzen statt hinzufügen
-    cards.value = [cardTemperature, cardHumidity, cardAirQuality, cardPressure];
+    cards.value = [
+      cardTemperature,
+      cardHumidity,
+      cardAirQuality,
+      cardPressure,
+      cardCompGas,
+    ];
   }
 }
 
-function setCharts() {
+function initializeCharts() {
   charts.value = [];
-  historyCharts.value = []; // Also reset month charts if they exist
+  if (!selectedRoom.value?.roomId) return;
 
-  // 1️⃣ History des selektierten Raums auslesen (falls vorhanden)
-  const roomId = selectedRoom.value?.roomId;
-  // Use nullish coalescing for safety, default to empty array if no history or no room selected
-  const historyForSelected = roomId != null ? roomsHistory.value[roomId] ?? [] : [];
+  const roomId = selectedRoom.value.roomId;
+  const historyForSelected = roomsHistory.value[roomId] ?? [];
 
-  // Proceed only if there is history data
   if (historyForSelected.length > 0) {
-    // 2️⃣ Diagrammdaten nur für den selektierten Raum erstellen
+    console.log(
+      "Initializing charts for room:",
+      roomId,
+      "with",
+      historyForSelected.length,
+      "history points"
+    );
+
     const temperatureData = GlobalHelper.MapChartDataTemperature(historyForSelected);
     const humidityData = GlobalHelper.MapChartDataHumidity(historyForSelected);
     const airQualityData = GlobalHelper.MapChartDataAirQuality(historyForSelected);
     const pressureData = GlobalHelper.MapChartDataPressure(historyForSelected);
 
-    // 3️⃣ Options initialisieren
     const chartOptions = new ChartOptions();
 
-    // 4️⃣ Charts-Array befüllen
     charts.value.push(
       { data: temperatureData, options: chartOptions },
       { data: humidityData, options: chartOptions },
       { data: airQualityData, options: chartOptions },
       { data: pressureData, options: chartOptions }
     );
+  } else {
+    console.log("No history data to initialize charts for room:", roomId);
+
+    const emptyChartData = (): ChartData => ({
+      labels: [],
+      datasets: [{ label: "", data: [] as Array }],
+    });
+    const chartOptions = new ChartOptions();
+    charts.value.push(
+      { data: emptyChartData(), options: chartOptions },
+      { data: emptyChartData(), options: chartOptions },
+      { data: emptyChartData(), options: chartOptions },
+      { data: emptyChartData(), options: chartOptions }
+    );
+    console.log("Initialized empty chart structures for room:", roomId);
   }
 }
 
+// ----- LIFECYCLE HOOK -----
+
 onMounted(async () => {
+  console.log("Index Page Mounted - Fetching initial data from stores...");
   loadingStore.setLoading(true);
-  const config = await getConfig();
-  const countdownSeconds = config!.countdown?.timerSeconds || 30; // fallback to 30 if missing
+  selectedRoom.value = null; // Reset selection
+  rooms.value = [];
+  roomsHistory.value = {};
 
-  const webSocket = new WebSocket(
-    `${import.meta.env.VITE_API_WSPROTOCOL}${import.meta.env.VITE_API_URL}/api/roomDatas/ws`
-  );
+  try {
+    const rawRoomData = await roomDataStore.GetAll();
 
-  webSocket.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-      latestFetch.value = new Date();
-      let needsUIClear = false;
-      let selectedRoomExists = false;
+    if (!rawRoomData || rawRoomData.length === 0) {
+      console.warn("No room data received from the store.");
+    } else {
+      console.log(`Fetched ${rawRoomData.length} data points.`);
+      processFetchedData(rawRoomData);
 
-      data.forEach((roomData: any) => {
-        const existingRoomIndex = rooms.value.findIndex(
-          (room) => room.roomId === roomData.roomId
-        );
-        if (existingRoomIndex !== -1) {
-          // Update existing room (more efficient to update in place)
-          Object.assign(rooms.value[existingRoomIndex], {
-            temperature: roomData.temperature,
-            humidity: roomData.humidity,
-            pressure: roomData.pressure,
-            gas: roomData.gas,
-            timeStamp: roomData.timeStamp,
-          });
-          if (
-            selectedRoom.value &&
-            rooms.value[existingRoomIndex].roomId === selectedRoom.value.roomId
-          ) {
-            selectedRoomExists = true;
-          }
-        } else {
-          rooms.value.push({
-            roomId: roomData.roomId,
-            temperature: roomData.temperature,
-            humidity: roomData.humidity,
-            pressure: roomData.pressure,
-            gas: roomData.gas,
-            timeStamp: roomData.timeStamp,
-          });
-        }
-
-        const id = roomData.roomId;
-        const historyForRoom = roomsHistory.value[id] ?? [];
-        const lastEntry = historyForRoom[historyForRoom.length - 1];
-        if (!lastEntry || new Date(roomData.timeStamp) > new Date(lastEntry.timeStamp)) {
-          // Keep history size manageable if desired (e.g., last 100 entries)
-          // if (historyForRoom.length > 100) {
-          //   historyForRoom.shift();
-          // }
-          historyForRoom.push({
-            timeStamp: roomData.timeStamp,
-            temperature: roomData.temperature,
-            humidity: roomData.humidity,
-            pressure: roomData.pressure,
-            airQuality: roomData.gas,
-          });
-        }
-        roomsHistory.value[id] = historyForRoom;
-      });
-
-      // If rooms were received, but the previously selected one wasn't among them
-      if (
-        selectedRoom.value &&
-        !data.some((rd: any) => rd.roomId === selectedRoom.value?.roomId)
-      ) {
-        // Option 1: Select the first available room if any exist
-        if (rooms.value.length > 0) {
-          selectedRoom.value = rooms.value[0];
-          console.log(
-            "Selected room disappeared, auto-selecting first available:",
-            selectedRoom.value.roomId
-          );
-          // Setup specific WS for the new room
-          setupRoomSpecificWebSocket(selectedRoom.value);
-        } else {
-          // Option 2: No rooms left, clear selection
-          selectedRoom.value = null;
-          needsUIClear = true;
-          console.log("Selected room disappeared, no other rooms available.");
-        }
-      }
-      // If no room was selected initially, or after clearing, select the first one if available
-      if (!selectedRoom.value && rooms.value.length > 0) {
+      if (hasRooms.value) {
         selectedRoom.value = rooms.value[0];
-        console.log(
-          "No room selected, auto-selecting first available:",
-          selectedRoom.value.roomId
-        );
-        // Setup specific WS for the newly selected room
-        setupRoomSpecificWebSocket(selectedRoom.value);
-      } else if (rooms.value.length === 0) {
-        selectedRoom.value = null;
-        needsUIClear = true;
-        console.log("Update resulted in zero rooms.");
-      }
-
-      if (selectedRoom.value) {
         setCards();
-        if (charts.value.length === 0) {
-          // Update charts if they haven't been set yet
-          setCharts();
-        }
-      } else if (needsUIClear) {
-        cards.value = [];
-        charts.value = [];
-        historyCharts.value = [];
-      }
-    } catch (e) {
-      console.error("Error processing WebSocket message:", e);
-    } finally {
-      if (loadingStore.isLoading) {
-        loadingStore.setLoading(false);
+        initializeCharts();
+        console.log("Default room selected:", selectedRoom.value.roomId);
+      } else {
+        console.log("No displayable rooms after processing data.");
       }
     }
-  };
-
-  webSocket.onerror = (error) => {
-    console.error("WebSocket Error:", error);
+  } catch (error) {
+    console.error("Failed to fetch or process initial room data:", error);
+    rooms.value = [];
+    roomsHistory.value = {};
+  } finally {
     loadingStore.setLoading(false);
-  };
-  webSocket.onclose = () => {
-    console.warn("WebSocket connection closed.");
-    // Decide if UI should be cleared or state maintained
-    // loadingStore.setLoading(false);
-  };
-
-  // Start countdown timer (only in browser; not during SSR)
-  if (process.client) {
-    startCountdown(countdownSeconds);
-
-    // refresh charts every 30 seconds
-    setInterval(() => {
-      if (selectedRoom.value && hasHistoryDataForSelectedRoom.value) {
-        setCharts();
-        console.log("🔄 Charts updated (interval refresh)");
-      }
-    }, countdownSeconds * 1000); // convert to milliseconds
+    console.log("Initial data fetch attempt complete.");
   }
 });
 
-function setupRoomSpecificWebSocket(room: Room | null) {
-  if (!room) return;
+// ----- WebSocket Subscription -----
 
-  console.log(`Setting up specific WS for room: ${room.roomId}`);
-  const ws = new WebSocket(
-    `${import.meta.env.VITE_API_WSPROTOCOL}${import.meta.env.VITE_API_URL}/api/roomDatas/ws/${room.roomId}`
-  );
+function subscribeToRoom(roomId: string) {
+  const newEndpoint = `/RoomDatas/ws/${roomId}`;
 
-  ws.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-      console.log("🔥 Received specific data for room:", data.roomId, data);
+  unsubscribeFromCurrentRoom();
 
-      if (data.isBurning) {
-        console.warn("🔥🔥🔥 ALARM: Dieser Raum brennt! 🔥🔥🔥", room.roomId);
-        triggerTheInferno();
-      }
-    } catch (e) {
-      console.error("Failed to parse specific room WS message:", e);
+  currentWsCallback = (data: any) => {
+    if (!data || typeof data !== "object") {
+      console.warn("[WS] Invalid data received:", data);
+      return;
     }
+
+    if (data[0]) {
+      data = data[0];
+    }
+
+    // Validate required fields exist and are of correct type
+    const requiredFields = {
+      id: "number",
+      humidity: "number",
+      temperature: "number",
+      pressure: "number",
+      gas: "number",
+      timeStamp: "string",
+      roomId: "number",
+    };
+
+    const isValid = Object.entries(requiredFields).every(
+      ([field, type]) => field in data && typeof data[field] === type
+    );
+
+    if (!isValid) {
+      console.warn("[WS] Data missing required fields or invalid types:", data);
+      return;
+    }
+
+    const roomData = new RoomData(
+      data.id,
+      data.humidity,
+      data.temperature,
+      data.pressure,
+      data.gas,
+      data.timeStamp,
+      data.roomId
+    );
+
+    handleWebSocketMessage(roomData);
   };
 
-  ws.onerror = (error) =>
-    console.error(`WebSocket Error for room ${room.roomId}:`, error);
-  ws.onclose = (event) =>
-    console.warn(
-      `WebSocket connection closed for room ${room.roomId}:`,
-      event.code,
-      event.reason
-    );
+  console.log(`[WS] Subscribing to ${newEndpoint}`);
+  socketService.subscribe(newEndpoint, currentWsCallback);
+  currentWsEndpoint = newEndpoint;
 }
 
-function roomSelected(room: Room) {
+function unsubscribeFromCurrentRoom() {
+  if (currentWsEndpoint && currentWsCallback) {
+    console.log(`[WS] Unsubscribing from ${currentWsEndpoint}`);
+    socketService.unsubscribe(currentWsEndpoint, currentWsCallback);
+    currentWsEndpoint = null;
+    currentWsCallback = null;
+  }
+}
+
+// ----- EVENT HANDLERS -----
+
+function roomSelected(room: DisplayRoom) {
+  // Check if its a different room before updating
   if (selectedRoom.value?.roomId !== room.roomId) {
-    console.log("Set new room", selectedRoom.value?.roomId ?? "None", "->", room.roomId);
+    console.log("Room selected by user:", room.roomId);
     selectedRoom.value = room;
-    setCards();
-    setCharts();
-    setupRoomSpecificWebSocket(room);
+    // Update cards and charts when room changes (handled by watcher)
   }
 }
 
-function triggerTheInferno() {
-  alert("🔥 Achtung: Der Raum " + selectedRoom.value?.roomId + " steht in Flammen!");
-  launchFlyingFlames(15);
+// Watch for changes in selectedRoom to update UI
+watch(
+  selectedRoom,
+  (newRoom, oldRoom) => {
+    if (newRoom?.roomId !== oldRoom?.roomId) {
+      console.log(`Selected room changed from ${oldRoom?.roomId} to ${newRoom?.roomId}`);
 
-  const mainContent = document.getElementById("main-content");
-  if (mainContent) {
-    mainContent.classList.add("inferno-effect");
-    setTimeout(() => {
-      mainContent.classList.remove("inferno-effect");
-    }, 8000);
-  }
+      // Unsubscribe happens inside subscribeToRoom, but calling it here for clarity
+      unsubscribeFromCurrentRoom();
 
-  const statCards = document.querySelectorAll(".stat-card");
-  statCards.forEach((card) => {
-    (card as HTMLElement).classList.add("inferno-effect");
-    setTimeout(() => {
-      (card as HTMLElement).classList.remove("inferno-effect");
-    }, 8000);
-  });
-}
+      setCards();
+      initializeCharts();
 
-function launchFlyingFlames(count: number) {
-  console.log(`Launching ${count} flames...`);
-  for (let i = 0; i < count; i++) {
-    const flame = document.createElement("div");
-    flame.classList.add("flame");
-    flame.style.left = `${Math.random() * 10 - 10}vw`;
-    flame.style.top = `${Math.random() * 80 + 10}vh`;
-    flame.style.animationDuration = `${Math.random() * 2 + 3}s`;
-    flame.style.animationDelay = `${Math.random() * 1}s`;
-    document.body.appendChild(flame);
-    setTimeout(
-      () => flame.remove(),
-      parseFloat(flame.style.animationDuration) * 1000 +
-        parseFloat(flame.style.animationDelay) * 1000
-    );
-  }
-}
+      if (newRoom) {
+        subscribeToRoom(newRoom.roomId);
+      } else {
+        unsubscribeFromCurrentRoom();
+      }
+    }
+  },
+  { immediate: false }
+); // Don't run immediately, onMounted handles initial setup
+
+// ----- Cleanup on Component Unmount -----
+onUnmounted(() => {
+  console.log("[WS] Component unmounting. Cleaning up WebSocket subscriptions.");
+  unsubscribeFromCurrentRoom();
+});
 </script>
 
 <template>
@@ -349,16 +469,7 @@ function launchFlyingFlames(count: number) {
   </div>
 
   <!-- Fallback 1: No Rooms -->
-  <div
-    v-else-if="!hasRooms"
-    class="mt-10 p-6 border border-dashed border-gray-400 rounded-lg bg-gray-50 text-center"
-  >
-    <h2 class="text-xl font-semibold text-gray-700 mb-2">Keine Räume verfügbar</h2>
-    <p class="text-gray-500">
-      Es wurden keine Raumdaten empfangen. Bitte überprüfen Sie die Sensoren und die
-      Serververbindung.
-    </p>
-  </div>
+  <NoRooms v-else-if="!hasRooms" />
 
   <!-- Main content -->
   <div v-else id="main-content">
@@ -366,13 +477,13 @@ function launchFlyingFlames(count: number) {
       :latestFetch="latestFetch"
       :rooms="rooms"
       :selectedRoom="selectedRoom"
-      :countdown="countdown"
       @roomSelected="roomSelected"
     />
 
+    <!-- Statistic Cards -->
     <div
       v-if="selectedRoom"
-      class="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-center"
+      class="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-center"
     >
       <StatisticCard
         v-for="card in cards"
@@ -387,6 +498,7 @@ function launchFlyingFlames(count: number) {
       />
     </div>
 
+    <!-- Placeholder if no room is selected -->
     <div
       v-else
       class="mt-4 p-4 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-md text-center"
@@ -394,24 +506,17 @@ function launchFlyingFlames(count: number) {
       Bitte wählen Sie oben einen Raum aus, um Details anzuzeigen.
     </div>
 
+    <!-- Data Display Area -->
     <div v-if="selectedRoom" class="mt-4">
-      <!-- Fallback 2: No History Data -->
-      <div
-        v-if="!hasHistoryDataForSelectedRoom"
-        class="p-4 border border-dashed border-yellow-400 rounded-lg bg-yellow-50 dark:bg-yellow-900/50 text-center"
-      >
-        <p class="text-yellow-700 dark:text-yellow-300">
-          Für den Raum "{{ selectedRoom.roomId }}" liegen derzeit keine Verlaufsdaten vor.
-        </p>
-        <p class="text-yellow-600 dark:text-yellow-400 text-sm mt-1">
-          Diagramme und Tabelle werden angezeigt, sobald Daten empfangen werden.
-        </p>
-      </div>
+      <!-- Fallback 2: No History Data for the selected room -->
+      <NoCharts v-if="!hasHistoryDataForSelectedRoom" :selectedRoom="selectedRoom" />
 
+      <!-- Display Table and Charts -->
       <div v-else>
+        <!-- Room Table -->
         <RoomTable :room-data="roomsHistory" :selected-room="selectedRoom" class="mt-4" />
 
-        <!-- Mobile Tabs -->
+        <!-- Mobile Tabs for Charts -->
         <div class="mt-4 block sm:hidden">
           <Tabs value="0">
             <TabList
@@ -445,6 +550,7 @@ function launchFlyingFlames(count: number) {
                 class="p-0 focus:outline-none"
               >
                 <div class="mt-4 flex flex-col gap-4">
+                  <!-- Display Day Chart for the selected tab -->
                   <StatisticDiagram
                     v-if="charts[tab.dayChart]"
                     :title="chartTitles[tab.dayChart]"
@@ -453,19 +559,8 @@ function launchFlyingFlames(count: number) {
                     chartType="line"
                   />
                   <p v-else class="text-sm text-gray-500 text-center py-4">
-                    Tages-Diagramm nicht verfügbar.
+                    Diagramm nicht verfügbar.
                   </p>
-                  <!-- History/Month Chart Placeholder -->
-                  <!--
-                    <StatisticDiagram
-                      v-if="historyCharts[tab.monthChart]"
-                      :title="monthChartTitles[tab.monthChart]"
-                      :chartData="historyCharts[tab.monthChart].data"
-                      :chartOptions="historyCharts[tab.monthChart].options"
-                      chartType="bar"
-                    />
-                     <p v-else class="text-sm text-gray-500 text-center py-4">Monats-Diagramm nicht verfügbar.</p>
-                    -->
                 </div>
               </TabPanel>
             </TabPanels>
@@ -483,126 +578,25 @@ function launchFlyingFlames(count: number) {
             chartType="line"
             class="flex-grow w-full md:w-[calc(50%-0.5rem)] min-w-[250px]"
           />
-          <!-- Add a placeholder if charts array is empty but history exists (shouldn't normally happen with current logic, but safe) -->
+          <!-- Placeholder if charts array is empty but history exists (edge case) -->
           <p v-if="charts.length === 0" class="w-full text-center text-gray-500 py-4">
             Keine Diagramme zum Anzeigen.
           </p>
         </div>
-
-        <!--
-           <div v-if="historyCharts.length > 0" class="mt-4 hidden sm:flex flex-wrap gap-4">
-              <StatisticDiagram
-                v-for="(chart, index) in historyCharts"
-                :key="'month-' + index"
-                :title="monthChartTitles[index]"
-                :chartData="chart.data"
-                :chartOptions="chart.options"
-                chartType="bar"
-                class="flex-grow w-full md:w-[calc(50%-0.5rem)] min-w-[250px]"
-              />
-           </div>
-           <div v-else class="mt-4 hidden sm:block text-center text-gray-500 py-4">
-               Keine Monats-Diagramme verfügbar.
-           </div>
-           -->
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-@keyframes infernoShake {
-  0% {
-    transform: translate(1px, 1px) rotate(0deg);
-  }
-
-  10% {
-    transform: translate(-1px, -2px) rotate(-1deg);
-  }
-
-  20% {
-    transform: translate(-3px, 0px) rotate(1deg);
-  }
-
-  30% {
-    transform: translate(3px, 2px) rotate(0deg);
-  }
-
-  40% {
-    transform: translate(1px, -1px) rotate(1deg);
-  }
-
-  50% {
-    transform: translate(-1px, 2px) rotate(-1deg);
-  }
-
-  60% {
-    transform: translate(-3px, 1px) rotate(0deg);
-  }
-
-  70% {
-    transform: translate(3px, 1px) rotate(-1deg);
-  }
-
-  80% {
-    transform: translate(-1px, -1px) rotate(1deg);
-  }
-
-  90% {
-    transform: translate(1px, 2px) rotate(0deg);
-  }
-
-  100% {
-    transform: translate(1px, -2px) rotate(-1deg);
-  }
+.stat-card {
+  transition: box-shadow 0.3s ease;
+}
+.stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-@keyframes infernoGlow {
-  0% {
-    box-shadow: 0 0 10px red;
-  }
-
-  50% {
-    box-shadow: 0 0 30px orange;
-  }
-
-  100% {
-    box-shadow: 0 0 10px red;
-  }
-}
-
-@keyframes flyAcross {
-  0% {
-    transform: translateX(-100px) translateY(0px) scale(0.5);
-    opacity: 0;
-  }
-
-  10% {
-    opacity: 1;
-  }
-
-  100% {
-    transform: translateX(110vw) translateY(-200px) scale(1.5);
-    opacity: 0;
-  }
-}
-
-.flame {
-  position: fixed;
-  width: 40px;
-  height: 40px;
-  background-image: url("https://c.tenor.com/K3j9pwWlME0AAAAC/tenor.gif");
-  /* Oder ein SVG oder Emoji 🔥 */
-  background-size: cover;
-  z-index: 9999;
-  pointer-events: none;
-  animation: flyAcross 4s linear forwards;
-}
-
-.inferno-effect {
-  animation: infernoShake 0.5s infinite, infernoGlow 1s infinite;
-  background: linear-gradient(45deg, #ff0000cc, #ff9900cc);
-  color: white !important;
-  border: 2px solid #ff9900;
+button:focus {
+  outline: none;
 }
 </style>

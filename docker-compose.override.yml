@@ -1,5 +1,9 @@
 services:
   m241.server:
+    image: ${DOCKER_REGISTRY-}m241server
+    build:
+      context: .
+      dockerfile: M241.Server/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
   pgadmin:

@@ -30,16 +30,30 @@ namespace M241.Server.Controllers
 
         // GET: api/RoomDatas
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RoomData>>> GetRoomData()
+        public async Task<ActionResult<IEnumerable<RoomData>>> GetRoomData(int? maxPageSize)
         {
-            return await _context.RoomData.ToListAsync();
+            if(maxPageSize != null)
+            {
+                var roomDatas = await _context.RoomData
+                    .Include(r => r.Room)
+                    .ToListAsync();
+
+                var limitedRoomDatas = roomDatas
+                    .GroupBy(r => r.RoomId)
+                    .SelectMany(g => g
+                        .OrderByDescending(r => r.TimeStamp)
+                        .Take(maxPageSize.Value))
+                    .ToList();
+                return limitedRoomDatas;
+            }
+            return await _context.RoomData.Include(r => r.Room).ToListAsync();
         }
 
         // GET: api/RoomDatas/5
         [HttpGet("{id}")]
         public async Task<ActionResult<RoomData>> GetRoomData(int id)
         {
-            var roomData = await _context.RoomData.FindAsync(id);
+            var roomData = await _context.RoomData.Include(r => r.Room).FirstOrDefaultAsync(r => r.Id == id);
 
             if (roomData == null)
             {
@@ -97,7 +111,7 @@ namespace M241.Server.Controllers
             var roomData = createRoomData.MapToRoomData(room);
             _context.RoomData.Add(roomData);
             await _context.SaveChangesAsync();
-            var newRoom = await _context.RoomData.FindAsync(roomData.Id);
+            var newRoom = await _context.RoomData.Include(r => r.Room).FirstOrDefaultAsync(r => r.Id == roomData.Id);
             await WebSocketService.UpdateSockets(newRoom, _logger);
 
             return CreatedAtAction("GetRoomData", new { id = newRoom.Id }, newRoom);

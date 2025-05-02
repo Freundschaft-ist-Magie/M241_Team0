@@ -21,22 +21,29 @@ const isCritical = computed(() => isLow.value || isHigh.value);
 
 <template>
   <div
-    class="bg-white p-4 shadow-md shadow-black/40 rounded-md"
+    class="bg-white dark:bg-darkNeutral1 p-4 shadow-md shadow-black/40 rounded-md text-black dark:text-darkNeutral2"
     :class="{ 'border border-red-600': isCritical }"
   >
     <div class="flex justify-between items-center mb-2">
-      <h3 class="font-bold text-primary2" :class="{ 'text-red-600': isCritical }">
+      <h3
+        class="font-bold text-primary2 dark:text-darkPrimary1"
+        :class="{ 'text-red-600': isCritical }"
+      >
         {{ title }}
       </h3>
-      <Icon :name="icon" class="text-3xl text-black" />
+      <Icon :name="icon" class="text-3xl text-black dark:text-darkNeutral2" />
     </div>
-    <p class="text-2xl font-bold">{{ parseFloat(value.toFixed(2)) }} {{ unit }}</p>
-    <p class="text-gray-500">
+
+    <p class="text-2xl font-bold text-black dark:text-darkNeutral2">
+      {{ parseFloat(value.toFixed(2)) }} {{ unit }}
+    </p>
+
+    <p class="text-gray-500 dark:text-darkSecondary2">
       Normaler Bereich:
       <span> {{ normalRange.low }} {{ unit }} - {{ normalRange.high }} {{ unit }} </span>
     </p>
 
-    <div v-if="isCritical" class="text-amber-700">
+    <div v-if="isCritical" class="text-amber-700 dark:text-amber-300">
       <Message severity="error" variant="solid" class="my-4">
         <i class="pi pi-exclamation-triangle mr-2"></i>
         <span v-if="isLow">{{ criticalText.low }}</span>
