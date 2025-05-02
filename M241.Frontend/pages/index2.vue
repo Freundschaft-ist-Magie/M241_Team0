@@ -210,27 +210,42 @@ function updateChartsWithNewData(newData: RoomData) {
 
   const newLabel = new Date(newData.timeStamp).toLocaleTimeString();
 
-  const pushData = (chartIndex: number, label: string, value: number) => {
-    const chart = charts.value[chartIndex];
-    if (chart?.data?.labels && chart?.data?.datasets?.[0]?.data) {
-      chart.data.labels.push(label);
-      chart.data.datasets[0].data.push(value);
+  const now = Date.now();
 
-      // Optional: Limit chart points visible for performance
-      // const MAX_CHART_POINTS = 100;
-      // if (chart.data.labels.length > MAX_CHART_POINTS) {
-      //     chart.data.labels.shift();
-      //     chart.data.datasets[0].data.shift();
-      // }
-    } else {
-      console.warn(`[WS] Cannot update chart ${chartIndex}, data structure invalid.`);
-    }
-  };
+  // 30 Sekunden = 30.000 Millisekunden
+  if (now - lastChartUpdate.value < 30_000) {
+    console.log("[Chart] Update übersprungen – noch keine 30 Sekunden vergangen.");
+    return;
+  }
+
+  lastChartUpdate.value = now;
 
   pushData(0, newLabel, newData.temperature);
   pushData(1, newLabel, newData.humidity);
   pushData(2, newLabel, newData.gas);
   pushData(3, newLabel, newData.pressure);
+}
+
+function pushData(chartIndex: number, label: string, value: number) {
+  const old = charts.value[chartIndex];
+  if (!old) return;
+
+  // Neue Kopien erzeugen (Chart.js braucht das mit PrimeVue!)
+  const newLabels = [...old.data.labels, label];
+  const newData = [...old.data.datasets[0].data, value];
+
+  charts.value[chartIndex] = {
+    data: {
+      labels: newLabels,
+      datasets: [
+        {
+          ...old.data.datasets[0],
+          data: newData,
+        },
+      ],
+    },
+    options: old.options, // Kann gleich bleiben
+  };
 }
 
 // ----- UI UPDATE FUNCTIONS -----
@@ -322,8 +337,6 @@ onMounted(async () => {
         setCards();
         initializeCharts();
         console.log("Default room selected:", selectedRoom.value.roomId);
-
-        subscribeToRoom(selectedRoom.value.roomId);
       } else {
         console.log("No displayable rooms after processing data.");
       }
@@ -349,6 +362,10 @@ function subscribeToRoom(roomId: string) {
     if (!data || typeof data !== "object") {
       console.warn("[WS] Invalid data received:", data);
       return;
+    }
+
+    if (data[0]) {
+      data = data[0]
     }
 
     // Validate required fields exist and are of correct type
