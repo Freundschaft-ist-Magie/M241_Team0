@@ -63,9 +63,9 @@
     "chartColor": "#3357FF"
   },
   "compGas": {
-    "title": "Luftqualität (Kompensationswert)",
+    "title": "Luftqualitäts-Index",
     "icon": "mdi:clouds",
-    "unit": "",
+    "unit": "IAQ",
     "normalRange": {
       "low": 5,
       "high": 20
