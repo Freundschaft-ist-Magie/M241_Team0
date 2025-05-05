@@ -105,7 +105,7 @@ onUnmounted(() => {
        {{ unit }}
         </p>
 
-        <div class="w-full mt-4 min-h-[90px]">
+        <div class="w-full mt-4 min-h-[110px] lg:min-h-[90px]">
           <div
             v-if="showCriticalMessage && props.value != null"
             class="text-amber-700 dark:text-amber-300"
