@@ -3,7 +3,8 @@
   "teamName": "Team:0",
   "Version": "1.0.0",
   "countdown": {
-    "timerSeconds": 30
+    "timerSeconds": 30,
+    "criticalDelaylMs": 2500
   },
   "temperature": {
     "title": "Temperatur",

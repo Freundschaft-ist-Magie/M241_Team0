@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { getConfig } from "~/utils/helper/ConfigLoader";
+
 const props = defineProps({
   title: String,
   value: Number,
@@ -22,7 +24,7 @@ const isCritical = computed(() => isLow.value || isHigh.value);
 
 const showCriticalMessage = ref(false);
 let criticalTimerId: ReturnType<typeof setTimeout> | null = null;
-const CRITICAL_DELAY = 2500;
+const CRITICAL_DELAY = ref(0);
 
 watch(isCritical, (newValue, oldValue) => {
   if (criticalTimerId) {
@@ -36,9 +38,18 @@ watch(isCritical, (newValue, oldValue) => {
         showCriticalMessage.value = true;
       }
       criticalTimerId = null;
-    }, CRITICAL_DELAY);
+    }, CRITICAL_DELAY.value);
   } else {
     showCriticalMessage.value = false;
+  }
+});
+
+onMounted(async () => {
+  const config = await getConfig();
+  if (config) {
+    CRITICAL_DELAY.value = config.countdown?.criticalDelaylMs;
+  } else {
+    console.error("Failed to load configuration");
   }
 });
 
@@ -75,45 +86,49 @@ onUnmounted(() => {
     </div>
 
     <div
-      class="bg-white dark:bg-darkNeutral1 rounded-md p-4 h-4/5 flex flex-col justify-center items-center text-center shadow shadow-black/60 transition-colors duration-300 ease-in-out"
+      class="bg-white dark:bg-darkNeutral1 rounded-md p-4 h-4/5 flex flex-col justify-center items-center text-center shadow shadow-black/60 transition-colors duration-300 ease-in-out relative overflow-hidden"
       :class="[
         isCritical
           ? 'bg-red-100 dark:bg-red-900/60'
           : 'bg-green-100 dark:bg-green-800/60',
       ]"
     >
-      <p class="text-3xl font-bold text-black dark:text-darkNeutral2">
-        {{ props.value != null ? parseFloat(props.value.toFixed(2)) : "N/A" }} {{ unit }}
-      </p>
+      <!-- necessary for animation -->
+      <div>
+        <p class="text-3xl font-bold text-black dark:text-darkNeutral2">
+          {{ props.value != null ? parseFloat(props.value.toFixed(2)) : "N/A" }}
+          {{ unit }}
+        </p>
 
-      <p class="text-base text-gray-600 dark:text-darkSecondary2 mt-2">
-        Normaler Bereich: {{ normalRange.low }} {{ unit }} – {{ normalRange.high }}
-        {{ unit }}
-      </p>
+        <p class="text-base text-gray-600 dark:text-darkSecondary2 mt-2">
+          Normaler Bereich: {{ normalRange.low }} {{ unit }} – {{ normalRange.high }}
+       {{ unit }}
+        </p>
 
-      <div class="w-full mt-4 min-h-[85px]">
-        <div
-          v-if="isCritical && !showCriticalMessage"
-          class="w-full h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden"
-        >
+        <div class="w-full mt-4 min-h-[90px]">
           <div
-            class="h-full bg-red-500 dark:bg-red-400 w-0"
-            :style="{
-              animation: `progressBarAnimation ${CRITICAL_DELAY}ms linear forwards`,
-            }"
-          />
+            v-if="showCriticalMessage && props.value != null"
+            class="text-amber-700 dark:text-amber-300"
+          >
+            <Message severity="error" class="dark:bg-darkNeutral1!">
+              <i class="pi pi-exclamation-triangle mr-2"></i>
+              <span v-if="isLow">{{ criticalText.low }}</span>
+              <span v-else-if="isHigh">{{ criticalText.high }}</span>
+            </Message>
+          </div>
         </div>
+      </div>
 
+      <div
+        v-if="isCritical && !showCriticalMessage"
+        class="absolute bottom-0 left-0 w-full h-1 bg-gray-200 dark:bg-gray-700 overflow-hidden"
+      >
         <div
-          v-if="showCriticalMessage && props.value != null"
-          class="text-amber-700 dark:text-amber-300"
-        >
-          <Message severity="error" class="dark:bg-darkNeutral1!">
-            <i class="pi pi-exclamation-triangle mr-2"></i>
-            <span v-if="isLow">{{ criticalText.low }}</span>
-            <span v-else-if="isHigh">{{ criticalText.high }}</span>
-          </Message>
-        </div>
+          class="h-full bg-red-500 dark:bg-red-400 w-0"
+          :style="{
+            animation: `progressBarAnimation ${CRITICAL_DELAY}ms linear forwards`,
+          }"
+        />
       </div>
     </div>
   </div>
