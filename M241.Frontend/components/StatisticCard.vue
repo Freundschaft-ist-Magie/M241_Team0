@@ -14,9 +14,39 @@ const props = defineProps({
   },
 });
 
-const isLow = computed(() => props.value < props.normalRange.low);
-const isHigh = computed(() => props.value > props.normalRange.high);
+const isLow = computed(() => props.value != null && props.value < props.normalRange.low);
+const isHigh = computed(
+  () => props.value != null && props.value > props.normalRange.high
+);
 const isCritical = computed(() => isLow.value || isHigh.value);
+
+const showCriticalMessage = ref(false);
+let criticalTimerId: ReturnType<typeof setTimeout> | null = null;
+const CRITICAL_DELAY = 2500;
+
+watch(isCritical, (newValue, oldValue) => {
+  if (criticalTimerId) {
+    clearTimeout(criticalTimerId);
+    criticalTimerId = null;
+  }
+
+  if (newValue === true) {
+    criticalTimerId = setTimeout(() => {
+      if (isCritical.value) {
+        showCriticalMessage.value = true;
+      }
+      criticalTimerId = null;
+    }, CRITICAL_DELAY);
+  } else {
+    showCriticalMessage.value = false;
+  }
+});
+
+onUnmounted(() => {
+  if (criticalTimerId) {
+    clearTimeout(criticalTimerId);
+  }
+});
 </script>
 
 <template>
@@ -53,7 +83,7 @@ const isCritical = computed(() => isLow.value || isHigh.value);
       ]"
     >
       <p class="text-3xl font-bold text-black dark:text-darkNeutral2">
-        {{ parseFloat(value.toFixed(2)) }} {{ unit }}
+        {{ props.value != null ? parseFloat(props.value.toFixed(2)) : "N/A" }} {{ unit }}
       </p>
 
       <p class="text-base text-gray-600 dark:text-darkSecondary2 mt-2">
@@ -63,7 +93,19 @@ const isCritical = computed(() => isLow.value || isHigh.value);
 
       <div class="w-full mt-4 min-h-[85px]">
         <div
-          v-if="isCritical && props.value != null"
+          v-if="isCritical && !showCriticalMessage"
+          class="w-full h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden"
+        >
+          <div
+            class="h-full bg-red-500 dark:bg-red-400 w-0"
+            :style="{
+              animation: `progressBarAnimation ${CRITICAL_DELAY}ms linear forwards`,
+            }"
+          />
+        </div>
+
+        <div
+          v-if="showCriticalMessage && props.value != null"
           class="text-amber-700 dark:text-amber-300"
         >
           <Message severity="error" class="dark:bg-darkNeutral1!">
@@ -76,3 +118,14 @@ const isCritical = computed(() => isLow.value || isHigh.value);
     </div>
   </div>
 </template>
+
+<style>
+@keyframes progressBarAnimation {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+</style>
