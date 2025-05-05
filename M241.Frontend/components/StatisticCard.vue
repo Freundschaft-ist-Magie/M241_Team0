@@ -21,7 +21,7 @@ const isCritical = computed(() => isLow.value || isHigh.value);
 
 <template>
   <div
-    class="p-4 shadow-md rounded-md text-black dark:text-darkNeutral2 h-[300px] dark:bg-darkNeutral1 transition-colors duration-300 ease-in-out"
+    class="p-4 shadow-md rounded-md text-black dark:text-darkNeutral2 h-full dark:bg-darkNeutral1 transition-colors duration-300 ease-in-out"
     :class="[isCritical ? 'bg-red-100' : 'bg-green-100']"
   >
     <div class="flex justify-between items-start mb-4">
@@ -47,7 +47,9 @@ const isCritical = computed(() => isLow.value || isHigh.value);
     <div
       class="bg-white dark:bg-darkNeutral1 rounded-md p-4 h-4/5 flex flex-col justify-center items-center text-center shadow shadow-black/60 transition-colors duration-300 ease-in-out"
       :class="[
-        isCritical ? 'bg-red-100 dark:bg-red-900/60' : 'bg-green-100 dark:bg-green-800/60',
+        isCritical
+          ? 'bg-red-100 dark:bg-red-900/60'
+          : 'bg-green-100 dark:bg-green-800/60',
       ]"
     >
       <p class="text-3xl font-bold text-black dark:text-darkNeutral2">
@@ -59,12 +61,17 @@ const isCritical = computed(() => isLow.value || isHigh.value);
         {{ unit }}
       </p>
 
-      <div v-if="isCritical" class="text-amber-700 dark:text-amber-300">
-        <Message severity="error" variant="solid" class="my-4 dark:bg-darkNeutral1!">
-          <i class="pi pi-exclamation-triangle mr-2"></i>
-          <span v-if="isLow">{{ criticalText.low }}</span>
-          <span v-else-if="isHigh">{{ criticalText.high }}</span>
-        </Message>
+      <div class="w-full mt-4 min-h-[85px]">
+        <div
+          v-if="isCritical && props.value != null"
+          class="text-amber-700 dark:text-amber-300"
+        >
+          <Message severity="error" class="dark:bg-darkNeutral1!">
+            <i class="pi pi-exclamation-triangle mr-2"></i>
+            <span v-if="isLow">{{ criticalText.low }}</span>
+            <span v-else-if="isHigh">{{ criticalText.high }}</span>
+          </Message>
+        </div>
       </div>
     </div>
   </div>
