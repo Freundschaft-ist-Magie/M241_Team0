@@ -16,7 +16,7 @@
     ".nuxt": true,
     ".output": true,
     ".vscode": true,
-    "debug.log": true
+    "**/debug.log": true
   },
   "eslint.useFlatConfig": true,
   "eslint.format.enable": true,
