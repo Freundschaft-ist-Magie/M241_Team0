@@ -89,6 +89,8 @@ function processFetchedData(allRoomData: RoomData[]) {
     (a, b) => new Date(a.timeStamp).getTime() - new Date(b.timeStamp).getTime()
   );
 
+  console.log("allRoomData", allRoomData);
+
   for (const dataPoint of allRoomData) {
     const roomIdStr = String(dataPoint.roomId);
 
