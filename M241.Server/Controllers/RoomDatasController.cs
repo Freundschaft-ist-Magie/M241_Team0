@@ -13,6 +13,7 @@ using System.Text.Json;
 using System.Text;
 using M241.Server.Services;
 using Microsoft.AspNetCore.Authorization;
+using M241.Server.Data.Enum;
 
 namespace M241.Server.Controllers
 {
@@ -48,6 +49,25 @@ namespace M241.Server.Controllers
                 return limitedRoomDatas;
             }
             return await _context.RoomData.Include(r => r.Room).ToListAsync();
+        }
+
+        // GET: api/RoomDatas/timerange/{range}
+        [HttpGet("timerange/{range}")]
+        public async Task<ActionResult<IEnumerable<RoomData>>> GetRoomDataByTimeRange(TimeRange range) {
+          DateTime fromDate = range switch
+          {
+            TimeRange.Day => DateTime.UtcNow.AddDays(-1),
+            TimeRange.Week => DateTime.UtcNow.AddDays(-7),
+            TimeRange.Month => DateTime.UtcNow.AddMonths(-1),
+            _ => DateTime.UtcNow.AddDays(-1)
+          };
+
+          var filteredData = await _context.RoomData
+              .Where(rd => rd.TimeStamp >= fromDate)
+              .Include(rd => rd.Room)
+              .ToListAsync();
+
+          return Ok(filteredData);
         }
 
         // GET: api/RoomDatas/5
