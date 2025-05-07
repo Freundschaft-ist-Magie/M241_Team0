@@ -53,22 +53,53 @@ namespace M241.Server.Controllers
 
         // GET: api/RoomDatas/timerange/{range}
         [HttpGet("timerange/{range}")]
-        public async Task<ActionResult<IEnumerable<RoomData>>> GetRoomDataByTimeRange(TimeRange range)
+        public async Task<ActionResult<IEnumerable<object>>> GetRoomDataByTimeRange(
+            TimeRange range, [FromQuery] int? maxPoints)
         {
+            DateTime toDate = DateTime.UtcNow;
             DateTime fromDate = range switch
             {
-                TimeRange.Day => DateTime.UtcNow.AddDays(-1),
-                TimeRange.Week => DateTime.UtcNow.AddDays(-7),
-                TimeRange.Month => DateTime.UtcNow.AddMonths(-1),
-                _ => DateTime.UtcNow.AddDays(-1)
+                TimeRange.Day => toDate.AddDays(-1),
+                TimeRange.Week => toDate.AddDays(-7),
+                TimeRange.Month => toDate.AddMonths(-1),
+                _ => toDate.AddDays(-1)
             };
 
-            var filteredData = await _context.RoomData
-                .Where(rd => rd.TimeStamp >= fromDate)
+            var roomData = await _context.RoomData
+                .Where(rd => rd.TimeStamp >= fromDate && rd.TimeStamp <= toDate)
                 .Include(rd => rd.Room)
                 .ToListAsync();
 
-            return Ok(filteredData);
+            if (maxPoints is null || maxPoints <= 0)
+            {
+                return roomData;
+            }
+
+            var totalSeconds = (toDate - fromDate).TotalSeconds;
+            var intervalSeconds = totalSeconds / maxPoints.Value;
+
+            var buckets = Enumerable.Range(0, maxPoints.Value)
+                .Select(i =>
+                {
+                    var bucketStart = fromDate.AddSeconds(i * intervalSeconds);
+                    var bucketEnd = fromDate.AddSeconds((i + 1) * intervalSeconds);
+
+                    var bucketData = roomData
+                        .Where(rd => rd.TimeStamp >= bucketStart && rd.TimeStamp < bucketEnd)
+                        .ToList();
+
+                    return new
+                    {
+                        Time = bucketStart,
+                        AvgTemperature = bucketData.Any() ? bucketData.Average(rd => rd.Temperature) : (double?)null,
+                        AvgHumidity = bucketData.Any() ? bucketData.Average(rd => rd.Humidity) : (double?)null,
+                        RoomId = bucketData.FirstOrDefault()?.RoomId,
+                        Count = bucketData.Count
+                    };
+                })
+                .ToList();
+
+            return Ok(buckets);
         }
 
         // GET: api/RoomDatas/5
