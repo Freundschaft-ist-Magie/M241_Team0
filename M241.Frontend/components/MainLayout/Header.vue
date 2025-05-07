@@ -1,16 +1,12 @@
 <script lang="ts" setup>
-import { useAuthStore } from "~/utils/stores/base/AuthStore";
 import { usePageSettingsStore } from "~/utils/stores/base/PageSettingsStore";
 
-const authStore = useAuthStore();
 const pageSettingsStore = usePageSettingsStore();
 
 const navLinksPanel = ref();
-const notifPanel = ref();
 const serverStatusPopover = ref();
 const isServerOnline = ref(false);
 const userData = ref({
-  // this will contain the current user's data
   name: "Max Mustermann",
   image: "https://avatars.githubusercontent.com/u/143788063?s=200&v=4",
 });
@@ -19,35 +15,34 @@ const toggleNavLinksPanel = (event: Event) => {
   navLinksPanel.value.toggle(event);
 };
 
-const toggleNotifPanel = (event: Event) => {
-  notifPanel.value.toggle(event);
-};
-
 const toggleServerStatusPopover = (event: Event) => {
   serverStatusPopover.value.toggle(event);
 };
 
 const panelLinks = computed(() => {
-  const links = [
-    { to: "/", text: "AirCheck Dashboard", icon: "view-dashboard" },
-    { to: "/notifications", text: "Benachrichtigungen", icon: "bell" },
-    { to: "/forecast/dashboard", text: "Prognose Dashboard", icon: "chart-line" },
-    { to: "/user/settings", text: "Nutzer Einstellungen", icon: "cog" },
+  return [
+    {
+      id: "darkmode",
+      text: pageSettingsStore.isDarkMode ? "Light Mode" : "Dark Mode",
+      icon: pageSettingsStore.isDarkMode ? "weather-sunny" : "weather-night",
+      action: () => pageSettingsStore.toggleDarkMode(),
+      type: "button" as const,
+    },
+    {
+      id: "logout",
+      to: "/logout",
+      text: "Logout",
+      icon: "logout",
+      type: "link" as const,
+    },
   ];
-
-  // Only show admin dashboard link if user has admin role
-  if (authStore.role === "admin") {
-    links.push({ to: "/admin/dashboard", text: "Admin Dashboard", icon: "lock" });
-  }
-
-  links.push({ to: "/logout", text: "Logout", icon: "logout" });
-
-  return links;
 });
 
 const checkServerHealth = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_PROTOCOL}${import.meta.env.VITE_API_URL}/healthz`);
+    const response = await fetch(
+      `${import.meta.env.VITE_API_PROTOCOL}${import.meta.env.VITE_API_URL}/healthz`
+    );
     if (response.ok) {
       const text = await response.text();
       isServerOnline.value = text.toLowerCase().includes("healthy");
@@ -93,7 +88,10 @@ onMounted(() => {
     </Button>
 
     <div class="flex items-center gap-4 space-x-2 text-black dark:text-darkNeutral2">
-      <div class="relative flex gap-2 items-center" @click="toggleServerStatusPopover">
+      <div
+        class="relative flex gap-2 items-center cursor-pointer"
+        @click="toggleServerStatusPopover"
+      >
         <svg
           :class="isServerOnline ? 'text-green-500' : 'text-red-500'"
           class="w-3 h-3"
@@ -115,27 +113,51 @@ onMounted(() => {
 
       <div class="flex gap-2 items-center">
         <Button
-          @click="pageSettingsStore.toggleDarkMode"
-          :icon="pageSettingsStore.isDarkMode ? 'pi pi-sun' : 'pi pi-moon'"
-          :severity="pageSettingsStore.isDarkMode ? 'secondary' : 'secondary'"
-          class="p-button-rounded"
-        />
-
-        <Button
           severity="secondary"
-          class="p-0! m-0! bg-transparent! border-0!"
+          class="p-0! m-0! bg-transparent! border-0! flex items-center justify-center text-black dark:text-darkNeutral2"
           @click="toggleNavLinksPanel"
           aria-haspopup="true"
           aria-controls="navLinksPanel"
         >
-          <NuxtLink
-            to="logout"
-            class="flex items-center gap-2 text-left hover:bg-gray1/60 dark:hover:bg-darkAccent1/60 px-4 py-2 rounded-md"
-          >
-            <Icon name="mdi-light:logout" class="w-5 h-5 dark:text-white" />
-            <span class="dark:text-white">Logout</span>
-          </NuxtLink>
+          <Icon name="mdi:menu" class="w-6 h-6 p-5" />
         </Button>
+
+        <OverlayPanel ref="navLinksPanel" id="navLinksPanel">
+          <div class="flex flex-col gap-1 p-2 min-w-[200px]">
+            <!-- User Info Header -->
+            <div
+              class="flex items-center gap-3 p-2 border-b border-gray-200 dark:border-gray-700 mb-2"
+            >
+              <img
+                class="w-10 h-10 rounded-full"
+                :src="userData.image"
+                :alt="userData.name"
+              />
+              <span class="font-semibold">{{ userData.name }}</span>
+            </div>
+
+            <!-- Dynamic Links/Actions -->
+            <template v-for="item in panelLinks" :key="item.id">
+              <button
+                v-if="item.type === 'button'"
+                @click="item.action"
+                class="flex items-center gap-3 text-left hover:bg-gray-100 dark:hover:bg-darkAccent2 px-3 py-2 rounded-md w-full text-sm"
+              >
+                <Icon :name="`mdi:${item.icon}`" class="w-5 h-5" />
+                <span>{{ item.text }}</span>
+              </button>
+              <NuxtLink
+                v-else-if="item.type === 'link'"
+                :to="item.to!"
+                class="flex items-center gap-3 text-left hover:bg-gray-100 dark:hover:bg-darkAccent2 px-3 py-2 rounded-md text-sm"
+                @click="navLinksPanel.hide()"
+              >
+                <Icon :name="`mdi:${item.icon}`" class="w-5 h-5" />
+                <span>{{ item.text }}</span>
+              </NuxtLink>
+            </template>
+          </div>
+        </OverlayPanel>
       </div>
     </div>
   </div>
