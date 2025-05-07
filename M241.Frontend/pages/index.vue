@@ -114,7 +114,7 @@ function processFetchedData(allRoomData: RoomData[]) {
     pressure: latest.pressure,
     gas: latest.gas,
     timeStamp: latest.timeStamp,
-    room: latest.room
+    room: latest.room,
   }));
 
   displayRooms.sort((a, b) => a.roomId.localeCompare(b.roomId));
@@ -527,35 +527,13 @@ onUnmounted(() => {
             <TabList
               class="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto"
             >
-              <Tab
-                v-for="tab in tabs"
-                :key="tab.title"
-                :value="tab.value"
-                v-slot="{ selected }"
-                as="template"
-              >
-                <button
-                  :class="[
-                    'px-4 py-2 text-sm font-medium leading-5 whitespace-nowrap',
-                    'focus:outline-none focus:ring-2 ring-offset-1 ring-offset-blue-400 ring-white ring-opacity-60',
-                    selected
-                      ? 'text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-900 border-b-2 border-blue-500'
-                      : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
-                  ]"
-                >
-                  {{ tab.title }}
-                </button>
+              <Tab v-for="tab in tabs" :key="tab.title" :value="tab.value">
+                {{ tab.title }}
               </Tab>
             </TabList>
-            <TabPanels class="mt-2">
-              <TabPanel
-                v-for="tab in tabs"
-                :key="tab.value + '-panel'"
-                :value="tab.value"
-                class="p-0 focus:outline-none"
-              >
+            <TabPanels class="p-0!">
+              <TabPanel v-for="tab in tabs" :key="tab.value" :value="tab.value">
                 <div class="mt-4 flex flex-col gap-4">
-                  <!-- Display Day Chart for the selected tab -->
                   <StatisticDiagram
                     v-if="charts[tab.dayChart]"
                     :title="chartTitles[tab.dayChart]"
