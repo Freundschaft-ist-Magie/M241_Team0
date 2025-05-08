@@ -70,8 +70,9 @@ namespace M241.Server.Services
                                 MACAddress = roomData.MACAddress,
                             };
                         }
-
-                        var newRoomData = roomData.MapToRoomData(room);
+                        DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(roomData.TimeStamp);
+                        DateTime localDateTime = dateTimeOffset.LocalDateTime;
+                        var newRoomData = roomData.MapToRoomData(room, localDateTime);
                         context.RoomData.Add(newRoomData);
                         await context.SaveChangesAsync();
                         var newRoom = await context.RoomData.Include(r => r.Room).FirstOrDefaultAsync(n => n.Id == newRoomData.Id);
