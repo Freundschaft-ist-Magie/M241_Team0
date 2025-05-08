@@ -23,11 +23,13 @@ namespace M241.Server.Controllers
     {
         private readonly AeroSenseDbContext _context;
         private readonly ILogger<RoomDatasController> _logger;
+        private readonly IWebHostEnvironment _env;
 
-        public RoomDatasController(AeroSenseDbContext context, ILogger<RoomDatasController> logger)
+        public RoomDatasController(AeroSenseDbContext context, ILogger<RoomDatasController> logger, IWebHostEnvironment env)
         {
             _context = context;
             _logger = logger;
+            _env = env;
         }
 
         // GET: api/RoomDatas
@@ -121,6 +123,10 @@ namespace M241.Server.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutRoomData(int id, CreateRoomDataDto roomData)
         {
+            if (!_env.IsDevelopment())
+            {
+                return BadRequest("Endpunkt nicht vefügbar");
+            }
             if (id != roomData.Id)
             {
                 return BadRequest();
@@ -153,6 +159,10 @@ namespace M241.Server.Controllers
         [HttpPost]
         public async Task<ActionResult<RoomData>> PostRoomData(CreateRoomDataDto createRoomData)
         {
+            if (!_env.IsDevelopment())
+            {
+                return BadRequest("Endpunkt nicht vefügbar");
+            }
             var room = await _context.Rooms.FirstOrDefaultAsync(c => c.MACAddress == createRoomData.MACAddress);
             if(room is null)
             {
@@ -174,6 +184,10 @@ namespace M241.Server.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRoomData(int id)
         {
+            if (!_env.IsDevelopment())
+            {
+                return BadRequest("Endpunkt nicht vefügbar");
+            }
             var roomData = await _context.RoomData.FindAsync(id);
             if (roomData == null)
             {
