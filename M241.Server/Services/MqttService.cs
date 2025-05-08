@@ -26,6 +26,7 @@ namespace M241.Server.Services
             _options = new MqttClientOptionsBuilder()
                 .WithTcpServer(configuration["MQTT:server"], 8883)
                 .WithCredentials(configuration["MQTT:user"], configuration["MQTT:password"])
+                .WithWillQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
                 .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
                 .WithTlsOptions(new MqttClientTlsOptions
                 {
