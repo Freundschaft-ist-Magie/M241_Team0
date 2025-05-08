@@ -73,6 +73,11 @@ namespace M241.Server.Services
                         DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(roomData.TimeStamp);
                         DateTime localDateTime = dateTimeOffset.LocalDateTime;
                         var newRoomData = roomData.MapToRoomData(room, localDateTime);
+                        if (context.RoomData.Any(r => r.TimeStamp == localDateTime))
+                        {
+                            _logger.LogInformation("Duplicate entry for {localDateTime} received.", localDateTime);
+                            return;
+                        }
                         context.RoomData.Add(newRoomData);
                         await context.SaveChangesAsync();
                         var newRoom = await context.RoomData.Include(r => r.Room).FirstOrDefaultAsync(n => n.Id == newRoomData.Id);
