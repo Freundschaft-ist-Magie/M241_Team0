@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed } from "vue";
+import GlobalHelper from "../utils/helper/GlobalHelper";
 
 const props = defineProps({
   roomData: Array, // Das komplette Array (mit den Subarrays pro Raum)
@@ -42,7 +43,11 @@ const filteredRoomData = computed(() => {
           <Column field="temperature" header="Temperatur"></Column>
           <Column field="pressure" header="Druck"></Column>
           <Column field="airQuality" header="Luftqualität"></Column>
-          <Column field="timeStamp" header="Zeitstempel"></Column>
+          <Column field="timeStamp" header="Zeitstempel">
+            <template #body="slotProps">
+              {{ GlobalHelper.beautifyDate(slotProps.data.timeStamp) }}
+              </template>
+          </Column>
         </DataTable>
       </AccordionContent>
     </AccordionPanel>

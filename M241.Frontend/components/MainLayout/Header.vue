@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { usePageSettingsStore } from "~/utils/stores/base/PageSettingsStore";
+import {useMinimizedStore} from "~/utils/stores/base/MinimizedStore";
 
 const pageSettingsStore = usePageSettingsStore();
 
@@ -10,6 +11,8 @@ const userData = ref({
   name: "Max Mustermann",
   image: "https://avatars.githubusercontent.com/u/143788063?s=200&v=4",
 });
+
+const minimizedStore = useMinimizedStore();
 
 const toggleNavLinksPanel = (event: Event) => {
   navLinksPanel.value.toggle(event);
@@ -69,11 +72,41 @@ onMounted(() => {
     console.log("Server health check executed");
   }, 2 * 60 * 1000);
 });
+
+const showMaxButton = ref(false);
+
+// Überwache showMaxButton und setze es nach 2 Sekunden auf false, falls es true ist
+watch(showMaxButton, (newValue) => {
+  if (newValue) {
+    setTimeout(() => {
+      showMaxButton.value = false;
+    }, 2000); // 2 Sekunden
+  }
+});
+
+
 </script>
 
 <template>
   <div
+      class="w-full h-20 fixed top-0 left-0 z-50 flex justify-center items-center"
+      v-if="minimizedStore.isMinimized"
+      @mousemove="showMaxButton = true"
+      @mouseleave="showMaxButton = false"
+  >
+
+    <transition name="fade-in-top">
+      <Button
+          v-if="showMaxButton"
+          @click="minimizedStore.setMinimized(false)"
+          class="absolute top-0 right-0 m-2"
+          icon="pi pi-window-maximize"
+      />
+    </transition>
+  </div>
+  <div
     class="bg-gray2 p-4 flex justify-between items-center rounded-md shadow-md shadow-black/40 dark:bg-darkNeutral1 dark:text-darkNeutral2"
+    v-else
   >
     <Button
       severity="secondary"
@@ -109,6 +142,7 @@ onMounted(() => {
           <circle cx="8" cy="8" r="8" />
         </svg>
         <span class="text-base">{{ isServerOnline ? "Online" : "Offline" }}</span>
+        <Button icon="pi pi-arrow-up" class="p-0! m-0! bg-transparent! border-0!" @click="minimizedStore.setMinimized(true)"></Button>
         <i class="pi pi-question-circle"></i>
       </div>
       <Popover ref="serverStatusPopover">
@@ -169,3 +203,21 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Transition für Fade-in + Bewegung nach unten */
+.fade-in-top-enter-active,
+.fade-in-top-leave-active {
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.fade-in-top-enter-from {
+  opacity: 0;
+  transform: translateY(-20px); /* Startpunkt: Außerhalb der Ansicht */
+}
+
+.fade-in-top-leave-to {
+  opacity: 0;
+  transform: translateY(-20px); /* Zielpunkt beim Ausblenden: Zurück nach oben */
+}
+</style>

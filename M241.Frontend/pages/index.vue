@@ -9,9 +9,11 @@ import { useRoomStore } from "~/utils/stores/RoomStore";
 import { getConfig } from "~/utils/helper/ConfigLoader";
 import SocketService from "~/utils/services/base/SocketService";
 import RoomData from "~/models/RoomData";
+import {useMinimizedStore} from "~/utils/stores/base/MinimizedStore";
 
 // ----- STORE INTEGRATION -----
 const loadingStore = useLoadingStore();
+const minimizedStore = useMinimizedStore();
 const roomStore = useRoomStore();
 const roomDataStore = useRoomDataStore();
 
@@ -127,6 +129,7 @@ function processFetchedData(allRoomData: RoomData[]) {
   rooms.value = displayRooms;
   roomsHistory.value = historyMap;
   latestFetch.value = new Date();
+  selectedRoom.value = historyMap[selectedRoom.roomId]
 }
 
 // ----- WebSocket -----
@@ -163,6 +166,8 @@ function handleWebSocketMessage(newData: RoomData) {
       timeStamp: newData.timeStamp,
     };
     rooms.value.splice(roomIndex, 1, updatedDisplayRoom);
+
+    console.error("Updated room:", newData);
 
     // Also update the properties of the selectedRoom ref directly.
     // This is what cards and potentially other parts of the UI bind to.
@@ -241,7 +246,7 @@ function setCards() {
   if (!selectedRoom.value) return;
 
   const room = selectedRoom.value;
-  console.log("Setting cards for room:", room.roomId);
+  console.error("Setting cards for room:", room.roomId, "with data:", room);
 
   const cardTemperature = GlobalHelper.MapTemperature(room.temperature);
   const cardHumidity = GlobalHelper.MapHumidity(room.humidity);
@@ -378,8 +383,14 @@ function subscribeToRoom(roomId: string) {
       return;
     }
 
-    if (data[0]) {
+    if (Array.isArray(data)) {
+      if (data.length > 1) {
+        data.sort(
+            (a, b) => new Date(a.timeStamp).getTime() - new Date(b.timeStamp).getTime()
+        ).reverse();
+      }
       data = data[0];
+      console.error("sethereuma", data);
     }
 
     // Validate required fields exist and are of correct type
@@ -482,6 +493,7 @@ watch(
       :selectedRoom="selectedRoom"
       :countdown="countdown"
       @roomSelected="roomSelected"
+      v-if="!minimizedStore.isMinimized"
     />
 
     <!-- Statistic Cards -->
@@ -489,6 +501,7 @@ watch(
       v-if="selectedRoom"
       class="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-center"
     >
+
       <StatisticCard
         v-for="card in cards"
         :key="card.title"
@@ -511,7 +524,7 @@ watch(
     </div>
 
     <!-- Data Display Area -->
-    <div v-if="selectedRoom" class="mt-4">
+    <div v-if="selectedRoom && !minimizedStore.isMinimized" class="mt-4">
       <!-- Fallback 2: No History Data for the selected room -->
       <NoCharts v-if="!hasHistoryDataForSelectedRoom" :selectedRoom="selectedRoom" />
 
