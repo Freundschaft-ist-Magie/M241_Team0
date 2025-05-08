@@ -29,6 +29,13 @@ const panelLinks = computed(() => {
       type: "button" as const,
     },
     {
+      id: "admindashboard",
+      to: "/admin/dashboard",
+      text: "Admin Dashboard",
+      icon: "view-dashboard-edit",
+      type: "link" as const,
+    },
+    {
       id: "logout",
       to: "/logout",
       text: "Logout",
