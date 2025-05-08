@@ -5,6 +5,8 @@
 #include <Arduino_JSON.h>
 #include <WiFiNINA.h>
 #include <PubSubClient.h>
+#include <WiFiUdp.h>
+#include <NTPClient.h>
 #include "secrets.h"
 #include "config.h"
 
@@ -19,9 +21,10 @@ const boolean debuggingEnabled = DEBUGGING_ENABLED;
 
 String macAddress;
 WiFiSSLClient wiFiClient;
-
 Adafruit_BME680 bme(10);
 PubSubClient mqttClient(wiFiClient);
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", 0, 60000);
 
 void setup() {
   Serial.begin(9600);
@@ -34,11 +37,16 @@ void setup() {
   macAddress = getMacAddress();
   connectWiFi();
 
+  timeClient.begin();
+  timeClient.update();
+
   mqttClient.setServer(mqttHost, mqttPort);
   connectMqtt();
 }
 
 void loop() {
+  timeClient.update();
+
   if (bme.performReading()) {
     if (WiFi.status() == WL_CONNECTED) {
       if (mqttClient.connected()) {
@@ -77,7 +85,7 @@ void connectWiFi() {
     }
     wiFiStatus = attemptWiFiConnection();
   }
-  
+
   Serial.print("Connected to network named: ");
   Serial.println(wiFiSsid);
   Serial.print("IP Address: ");
@@ -125,6 +133,7 @@ void reconnectMqtt() {
 void publishSensorData() {
   JSONVar json;
   json["macAddress"] = macAddress;
+  json["timestamp"] = timeClient.getEpochTime();
   json["temperature"] = bme.temperature;
   json["humidity"] = bme.humidity;
   json["pressure"] = bme.pressure;
