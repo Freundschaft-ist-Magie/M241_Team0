@@ -75,6 +75,7 @@ components:
         be created if a new Mac address is provided here.
       required:
         - macAddress
+        - timestamp
         - temperature
         - humidity
         - pressure
@@ -87,6 +88,12 @@ components:
           maxLength: 17
           examples:
             - 'd8:3a:dd:6d:7f:03'
+        timestamp:
+          type: integer
+          format: int64
+          description: Epoch time in seconds corresponding to the instant of the measurements (e.g. 1746687013 means 'Thu May 08 2025 06:50:13 GMT+0000')
+          examples:
+            - '1746687013'
         temperature:
           type: number
           format: float
