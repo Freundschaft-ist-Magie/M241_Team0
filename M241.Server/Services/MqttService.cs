@@ -32,7 +32,8 @@ namespace M241.Server.Services
                     UseTls = true,
                     AllowUntrustedCertificates = true,
                     IgnoreCertificateChainErrors = true,
-                    IgnoreCertificateRevocationErrors = true
+                    IgnoreCertificateRevocationErrors = true,
+                    CertificateValidationHandler = context => true
                 })
                 .Build();
 
