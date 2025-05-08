@@ -4,7 +4,7 @@
 #include <Adafruit_BME680.h>
 #include <Arduino_JSON.h>
 #include <WiFiNINA.h>
-#include <PubSubClient.h>
+#include <MQTTClient.h>
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 #include "secrets.h"
@@ -21,14 +21,14 @@ const boolean debuggingEnabled = DEBUGGING_ENABLED;
 
 String macAddress;
 WiFiSSLClient wiFiClient;
+MQTTClient mqttClient(1024);
 Adafruit_BME680 bme(10);
-PubSubClient mqttClient(wiFiClient);
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", 0, 60000);
 
 void setup() {
   Serial.begin(9600);
-  if(debuggingEnabled) {
+  if (debuggingEnabled) {
     while (!Serial);
   }
 
@@ -40,12 +40,13 @@ void setup() {
   timeClient.begin();
   timeClient.update();
 
-  mqttClient.setServer(mqttHost, mqttPort);
+  mqttClient.begin(mqttHost, mqttPort, wiFiClient);
   connectMqtt();
 }
 
 void loop() {
   timeClient.update();
+  mqttClient.loop();
 
   if (bme.performReading()) {
     if (WiFi.status() == WL_CONNECTED) {
@@ -82,7 +83,7 @@ String getMacAddress() {
 void connectWiFi() {
   int wiFiStatus = WL_IDLE_STATUS;
   while (wiFiStatus != WL_CONNECTED) {
-    if(wiFiStatus != WL_IDLE_STATUS) {
+    if (wiFiStatus != WL_IDLE_STATUS) {
       delay(5000);
     }
     wiFiStatus = attemptWiFiConnection();
@@ -118,8 +119,7 @@ bool attemptMqttConnection() {
   Serial.print(mqttHost);
   Serial.print(":");
   Serial.println(mqttPort);
-  String clientId = "arduinoClient-" + macAddress;
-  return mqttClient.connect(clientId.c_str(), mqttUser, mqttPass);
+  return mqttClient.connect(("arduinoClient-" + macAddress).c_str(), mqttUser, mqttPass);
 }
 
 void reconnectWiFi() {
@@ -141,6 +141,9 @@ void publishSensorData() {
   json["pressure"] = bme.pressure;
   json["gas"] = bme.gas_resistance;
 
-  mqttClient.publish(mqttQueue, JSON.stringify(json).c_str());
-  Serial.println("Published data");
+  if (mqttClient.publish(mqttQueue, JSON.stringify(json).c_str(), false, 2)) {
+    Serial.println("Published data (QoS = exactly once)");
+  } else {
+    Serial.println("Failed to publish");
+  }
 }
