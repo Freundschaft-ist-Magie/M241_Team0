@@ -79,8 +79,8 @@ if (true /*app.Environment.IsDevelopment()*/)
     }
 }
 
-app.UseAuthorization();
 app.UseAuthentication();
+app.UseAuthorization();
 app.UseCors("SPA");
 
 app.MapControllers();

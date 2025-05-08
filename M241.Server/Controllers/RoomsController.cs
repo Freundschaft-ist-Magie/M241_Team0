@@ -43,6 +43,7 @@ namespace M241.Server.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles= "Administrator")]
         public async Task<IActionResult> PutRoom(int id, Room roomDto)
         {
             if (id != roomDto.Id)
@@ -72,6 +73,7 @@ namespace M241.Server.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Administrator")]
         public async Task<ActionResult<Room>> PostRoom(Room room)
         {
             _context.Rooms.Add(room);
