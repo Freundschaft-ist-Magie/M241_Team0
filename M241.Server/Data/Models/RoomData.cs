@@ -22,6 +22,9 @@ namespace M241.Server.Data.Models
         [JsonPropertyName("timeStamp")]
         public DateTime TimeStamp { get; set; }
 
+        [JsonPropertyName("localtimeStamp")]
+        public string LocalTimeStamp => TimeStamp.ToLocalTime().ToString("HH.mm.ss dd.MM.yy");
+
         [JsonPropertyName("room")]
         public Room? Room { get; set; }
 
