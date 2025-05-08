@@ -60,6 +60,8 @@ void loop() {
   } else {
     Serial.println("Failed to perform BME680 sensor reading :(");
   }
+
+  delay(1000);
 }
 
 void initSensor() {
