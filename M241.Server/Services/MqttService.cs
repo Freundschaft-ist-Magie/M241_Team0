@@ -71,7 +71,7 @@ namespace M241.Server.Services
                             };
                         }
                         DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(roomData.TimeStamp);
-                        DateTime localDateTime = dateTimeOffset.LocalDateTime;
+                        DateTime localDateTime = dateTimeOffset.UtcDateTime;
                         var newRoomData = roomData.MapToRoomData(room, localDateTime);
                         if (context.RoomData.Any(r => r.TimeStamp == localDateTime))
                         {
