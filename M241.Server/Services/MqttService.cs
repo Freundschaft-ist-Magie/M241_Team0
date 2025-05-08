@@ -28,13 +28,12 @@ namespace M241.Server.Services
                 .WithCredentials(configuration["MQTT:user"], configuration["MQTT:password"])
                 .WithWillQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
                 .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
-                .WithTlsOptions(new MqttClientTlsOptions
-                {
-                    UseTls = true,
-                    AllowUntrustedCertificates = true,
-                    IgnoreCertificateChainErrors = true,
-                    IgnoreCertificateRevocationErrors = true,
-                    CertificateValidationHandler = context => true
+                .WithTlsOptions(tls => {
+                    tls.UseTls();
+                    tls.WithAllowUntrustedCertificates();
+                    tls.WithIgnoreCertificateChainErrors();
+                    tls.WithIgnoreCertificateRevocationErrors();
+                    tls.WithCertificateValidationHandler(_ => true);
                 })
                 .Build();
 
