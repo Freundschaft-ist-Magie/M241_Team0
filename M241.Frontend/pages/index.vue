@@ -334,7 +334,7 @@ onMounted(async () => {
   roomsHistory.value = {};
 
   try {
-    const rawRoomData = await roomDataStore.GetAll();
+    const rawRoomData = await roomDataStore.GetLast20();
 
     if (!rawRoomData || rawRoomData.length === 0) {
       console.warn("No room data received from the store.");
@@ -460,12 +460,6 @@ watch(
   },
   { immediate: false }
 ); // Don't run immediately, onMounted handles initial setup
-
-// ----- Cleanup on Component Unmount -----
-onUnmounted(() => {
-  console.log("[WS] Component unmounting. Cleaning up WebSocket subscriptions.");
-  unsubscribeFromCurrentRoom();
-});
 </script>
 
 <template>
