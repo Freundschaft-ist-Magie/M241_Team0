@@ -18,7 +18,7 @@ const char* mqttQueue = MQTT_QUEUE;
 const boolean debuggingEnabled = DEBUGGING_ENABLED;
 
 String macAddress;
-WiFiClient wiFiClient;
+WiFiSSLClient wiFiClient;
 
 Adafruit_BME680 bme(10);
 PubSubClient mqttClient(wiFiClient);
@@ -124,7 +124,6 @@ void reconnectMqtt() {
 
 void publishSensorData() {
   JSONVar json;
-  json["id"] = 0;
   json["macAddress"] = macAddress;
   json["temperature"] = bme.temperature;
   json["humidity"] = bme.humidity;

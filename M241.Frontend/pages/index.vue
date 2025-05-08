@@ -6,6 +6,7 @@ import ChartData from "~/models/ChartData";
 import ChartOptions from "~/models/ChartOptions";
 import { useRoomDataStore } from "~/utils/stores/RoomDataStore";
 import { useRoomStore } from "~/utils/stores/RoomStore";
+import { getConfig } from "~/utils/helper/ConfigLoader";
 import SocketService from "~/utils/services/base/SocketService";
 import RoomData from "~/models/RoomData";
 
@@ -44,6 +45,7 @@ const lastChartUpdate = ref<Date | null>(null);
 
 const latestFetch = ref<Date>(new Date(1, 1, 1970));
 const selectedRoom = ref<DisplayRoom | null>(null);
+const countdown = ref(0);
 const rooms = ref<DisplayRoom[]>([]);
 const roomsHistory = ref<Record<string, ProcessedHistoryEntry[]>>({});
 const cards = ref<StatisticCardObj[]>([]);
@@ -87,6 +89,8 @@ function processFetchedData(allRoomData: RoomData[]) {
     (a, b) => new Date(a.timeStamp).getTime() - new Date(b.timeStamp).getTime()
   );
 
+  console.log("allRoomData", allRoomData);
+
   for (const dataPoint of allRoomData) {
     const roomIdStr = String(dataPoint.roomId);
 
@@ -114,7 +118,7 @@ function processFetchedData(allRoomData: RoomData[]) {
     pressure: latest.pressure,
     gas: latest.gas,
     timeStamp: latest.timeStamp,
-    room: latest.room
+    room: latest.room,
   }));
 
   displayRooms.sort((a, b) => a.roomId.localeCompare(b.roomId));
@@ -192,18 +196,15 @@ function handleWebSocketMessage(newData: RoomData) {
   // }
 
   setCards();
-  updateChartsWithNewData(newData);
+  // let this code be in case we will have a chart in the future, that can be live updated
+  // updateChartsWithNewData();
 }
 
 /**
  * Updates the existing chart data arrays instead of rebuilding them completely.
  */
-function updateChartsWithNewData(newData: RoomData) {
-  if (
-    charts.value.length !== 4 ||
-    !selectedRoom.value ||
-    String(newData.roomId) !== selectedRoom.value.roomId
-  ) {
+function updateChartsWithNewData() {
+  if (charts.value.length !== 4 || !selectedRoom.value) {
     console.warn(
       "[WS] Chart structure not ready or data for wrong room. Skipping direct chart update."
     );
@@ -211,44 +212,26 @@ function updateChartsWithNewData(newData: RoomData) {
     return;
   }
 
-  const newLabel = new Date(newData.timeStamp).toLocaleTimeString();
+  charts.value = [];
 
-  const now = Date.now();
+  const roomId = selectedRoom.value?.roomId;
+  const historyForSelected = roomId != null ? roomsHistory.value[roomId] ?? [] : [];
 
-  // 30 Sekunden = 30.000 Millisekunden
-  if (now - lastChartUpdate.value < 30_000) {
-    console.log("[Chart] Update übersprungen – noch keine 30 Sekunden vergangen.");
-    return;
+  if (historyForSelected.length > 0) {
+    const temperatureData = GlobalHelper.MapChartDataTemperature(historyForSelected);
+    const humidityData = GlobalHelper.MapChartDataHumidity(historyForSelected);
+    const airQualityData = GlobalHelper.MapChartDataAirQuality(historyForSelected);
+    const pressureData = GlobalHelper.MapChartDataPressure(historyForSelected);
+
+    const chartOptions = new ChartOptions();
+
+    charts.value.push(
+      { data: temperatureData, options: chartOptions },
+      { data: humidityData, options: chartOptions },
+      { data: airQualityData, options: chartOptions },
+      { data: pressureData, options: chartOptions }
+    );
   }
-
-  lastChartUpdate.value = now;
-
-  pushData(0, newLabel, newData.temperature);
-  pushData(1, newLabel, newData.humidity);
-  pushData(2, newLabel, newData.gas);
-  pushData(3, newLabel, newData.pressure);
-}
-
-function pushData(chartIndex: number, label: string, value: number) {
-  const old = charts.value[chartIndex];
-  if (!old) return;
-
-  // Neue Kopien erzeugen (Chart.js braucht das mit PrimeVue!)
-  const newLabels = [...old.data.labels, label];
-  const newData = [...old.data.datasets[0].data, value];
-
-  charts.value[chartIndex] = {
-    data: {
-      labels: newLabels,
-      datasets: [
-        {
-          ...old.data.datasets[0],
-          data: newData,
-        },
-      ],
-    },
-    options: old.options, // Kann gleich bleiben
-  };
 }
 
 // ----- UI UPDATE FUNCTIONS -----
@@ -324,6 +307,16 @@ function initializeCharts() {
   }
 }
 
+function startCountdown(countdownSeconds: number) {
+  countdown.value = countdownSeconds;
+  setInterval(() => {
+    countdown.value--;
+    if (countdown.value <= 0) {
+      countdown.value = countdownSeconds;
+    }
+  }, 1000);
+}
+
 // ----- LIFECYCLE HOOK -----
 
 onMounted(async () => {
@@ -332,6 +325,8 @@ onMounted(async () => {
   selectedRoom.value = null; // Reset selection
   rooms.value = [];
   roomsHistory.value = {};
+  const config = await getConfig();
+  const countdownSeconds = config!.countdown?.timerSeconds || 30;
 
   try {
     const rawRoomData = await roomDataStore.GetLast20();
@@ -351,6 +346,15 @@ onMounted(async () => {
         console.log("No displayable rooms after processing data.");
       }
     }
+
+    startCountdown(countdownSeconds);
+
+    setInterval(() => {
+      if (selectedRoom.value && hasHistoryDataForSelectedRoom.value) {
+        updateChartsWithNewData();
+        console.log("Charts updated (interval refresh)");
+      }
+    }, countdownSeconds * 1000);
   } catch (error) {
     console.error("Failed to fetch or process initial room data:", error);
     rooms.value = [];
@@ -476,6 +480,7 @@ watch(
       :latestFetch="latestFetch"
       :rooms="rooms"
       :selectedRoom="selectedRoom"
+      :countdown="countdown"
       @roomSelected="roomSelected"
     />
 
@@ -515,73 +520,7 @@ watch(
         <!-- Room Table -->
         <RoomTable :room-data="roomsHistory" :selected-room="selectedRoom" class="mt-4" />
 
-        <!-- Mobile Tabs for Charts -->
-        <div class="mt-4 block sm:hidden">
-          <Tabs value="0">
-            <TabList
-              class="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto"
-            >
-              <Tab
-                v-for="tab in tabs"
-                :key="tab.title"
-                :value="tab.value"
-                v-slot="{ selected }"
-                as="template"
-              >
-                <button
-                  :class="[
-                    'px-4 py-2 text-sm font-medium leading-5 whitespace-nowrap',
-                    'focus:outline-none focus:ring-2 ring-offset-1 ring-offset-blue-400 ring-white ring-opacity-60',
-                    selected
-                      ? 'text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-900 border-b-2 border-blue-500'
-                      : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
-                  ]"
-                >
-                  {{ tab.title }}
-                </button>
-              </Tab>
-            </TabList>
-            <TabPanels class="mt-2">
-              <TabPanel
-                v-for="tab in tabs"
-                :key="tab.value + '-panel'"
-                :value="tab.value"
-                class="p-0 focus:outline-none"
-              >
-                <div class="mt-4 flex flex-col gap-4">
-                  <!-- Display Day Chart for the selected tab -->
-                  <StatisticDiagram
-                    v-if="charts[tab.dayChart]"
-                    :title="chartTitles[tab.dayChart]"
-                    :chartData="charts[tab.dayChart].data"
-                    :chartOptions="charts[tab.dayChart].options"
-                    chartType="line"
-                  />
-                  <p v-else class="text-sm text-gray-500 text-center py-4">
-                    Diagramm nicht verfügbar.
-                  </p>
-                </div>
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
-        </div>
-
-        <!-- Desktop Day Charts -->
-        <div class="mt-4 hidden sm:flex flex-wrap gap-4">
-          <StatisticDiagram
-            v-for="(chart, index) in charts"
-            :key="'day-' + index"
-            :title="chartTitles[index]"
-            :chartData="chart.data"
-            :chartOptions="chart.options"
-            chartType="line"
-            class="flex-grow w-full md:w-[calc(50%-0.5rem)] min-w-[250px]"
-          />
-          <!-- Placeholder if charts array is empty but history exists (edge case) -->
-          <p v-if="charts.length === 0" class="w-full text-center text-gray-500 py-4">
-            Keine Diagramme zum Anzeigen.
-          </p>
-        </div>
+        <ChartsSection :tabs="tabs" :charts="charts" :chart-titles="chartTitles" />
       </div>
     </div>
   </div>

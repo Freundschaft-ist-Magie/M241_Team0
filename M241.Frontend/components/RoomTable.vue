@@ -12,6 +12,8 @@ const filteredRoomData = computed(() => {
     return [];
   }
 
+  console.warn(props.selectedRoom);
+
   const data = props.roomData[props.selectedRoom.roomId];
   if (!data) return [];
   // Optional: Id hinzufügen, wenn gewünscht
@@ -26,7 +28,7 @@ const filteredRoomData = computed(() => {
 <template>
   <Accordion v-if="props.selectedRoom" value="0">
     <AccordionPanel value="0">
-      <AccordionHeader>Raumtabelle für Raum {{props.selectedRoom.roomId}}</AccordionHeader>
+      <AccordionHeader>Raumtabelle für Raum {{ props.selectedRoom.room.macAddress }}</AccordionHeader>
       <AccordionContent>
         <DataTable
             :value="filteredRoomData"

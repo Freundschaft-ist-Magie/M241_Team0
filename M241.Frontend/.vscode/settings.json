@@ -15,7 +15,8 @@
     ".gitignore": true,
     ".nuxt": true,
     ".output": true,
-    ".vscode": true
+    ".vscode": true,
+    "**/debug.log": true
   },
   "eslint.useFlatConfig": true,
   "eslint.format.enable": true,

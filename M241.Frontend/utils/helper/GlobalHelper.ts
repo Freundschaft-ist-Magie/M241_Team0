@@ -155,7 +155,7 @@ class GlobalHelper {
     const dataset = new Dataset(
       title,
       airQuality.map((reading) => {
-        return Number(reading.airQuality);
+        return Number(reading.airQuality) / 1000;
       }),
       false,
       isForecast ? forecastColor : chartColor,
@@ -181,7 +181,7 @@ class GlobalHelper {
     const dataset = new Dataset(
       title,
       pressure.map((reading) => {
-        return Number(reading.pressure);
+        return Number(reading.pressure) / 1000;
       }),
       false,
       isForecast ? forecastColor : chartColor,
