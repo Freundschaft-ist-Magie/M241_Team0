@@ -20,10 +20,10 @@ namespace M241.Server.Data.Models
         public float Gas { get; set; }
 
         [JsonPropertyName("timeStamp")]
-        public DateTime TimeStamp { get; set; }
+        public DateTime TimeStampLocal => TimeStamp.ToLocalTime();
 
-        [JsonPropertyName("localtimeStamp")]
-        public string LocalTimeStamp => TimeStamp.ToLocalTime().ToString("HH.mm.ss dd.MM.yy");
+        [JsonPropertyName("timeStampUTC")]
+        public DateTime TimeStamp { get; set; }
 
         [JsonPropertyName("room")]
         public Room? Room { get; set; }

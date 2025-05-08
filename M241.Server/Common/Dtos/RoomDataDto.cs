@@ -21,6 +21,9 @@ namespace M241.Server.Common.Dtos
         public float Gas { get; set; }
 
         [JsonPropertyName("timeStamp")]
+        public DateTime TimeStampLocal => TimeStamp.ToLocalTime();
+
+        [JsonPropertyName("timeStampUTC")]
         public DateTime TimeStamp { get; set; }
 
         [JsonPropertyName("room")]
