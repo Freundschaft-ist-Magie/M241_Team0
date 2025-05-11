@@ -18,6 +18,7 @@ const char* mqttHost = MQTT_HOST;
 const int mqttPort = MQTT_PORT;
 const char* mqttQueue = MQTT_QUEUE;
 const boolean debuggingEnabled = DEBUGGING_ENABLED;
+const float TEMP_OFFSET = -2.0;
 
 String macAddress;
 WiFiSSLClient wiFiClient;
@@ -136,7 +137,7 @@ void publishSensorData() {
   JSONVar json;
   json["macAddress"] = macAddress;
   json["timestamp"] = timeClient.getEpochTime();
-  json["temperature"] = bme.temperature;
+  json["temperature"] = bme.temperature + TEMP_OFFSET;
   json["humidity"] = bme.humidity;
   json["pressure"] = bme.pressure;
   json["gas"] = bme.gas_resistance;
