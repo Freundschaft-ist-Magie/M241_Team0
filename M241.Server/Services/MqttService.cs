@@ -102,6 +102,19 @@ namespace M241.Server.Services
 
         }
 
+        public async Task PingRoom(string macAddress)
+        {
+            if (_client.IsConnected)
+            {
+                var message = new MqttApplicationMessageBuilder()
+                    .WithTopic("room/ping")
+                    .WithPayload(Encoding.UTF8.GetBytes(macAddress))
+                    .Build();
+
+                await _client.PublishAsync(message);
+            }
+        }
+
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             if (_client.IsConnected)
