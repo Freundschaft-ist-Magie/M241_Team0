@@ -45,6 +45,7 @@ builder.Services.AddTransient(provider => new MapperConfiguration(cfg =>
 }).CreateMapper());
 
 builder.Services.AddTransient<AeroSenseDbContext>();
+builder.Services.AddTransient<MqttService>();
 builder.Services.AddHostedService<MqttService>();
 builder.Services.AddHealthChecks();
 string frontendUrl = builder.Configuration["FrontendUrl"] ??
