@@ -141,7 +141,7 @@ void publishSensorData() {
   json["pressure"] = bme.pressure;
   json["gas"] = bme.gas_resistance;
 
-  if (mqttClient.publish(mqttQueue, JSON.stringify(json).c_str(), false, 2)) {
+  if (mqttClient.publish(mqttQueue, JSON.stringify(json).c_str())) {
     Serial.println("Published data (QoS = exactly once)");
   } else {
     Serial.println("Failed to publish");
