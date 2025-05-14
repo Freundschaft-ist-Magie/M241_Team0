@@ -340,6 +340,18 @@ class GlobalHelper {
     return `${day}. ${month}`;
   }
 
+  public static beautifyDate(timestamp: string): string {
+    const date = new Date(timestamp);
+    return date.toLocaleString("de-DE", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+    });
+  }
+
 
 }
 
