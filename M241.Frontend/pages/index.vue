@@ -9,7 +9,7 @@ import { useRoomStore } from "~/utils/stores/RoomStore";
 import { getConfig } from "~/utils/helper/ConfigLoader";
 import SocketService from "~/utils/services/base/SocketService";
 import RoomData from "~/models/RoomData";
-import {useMinimizedStore} from "~/utils/stores/base/MinimizedStore";
+import { useMinimizedStore } from "~/utils/stores/base/MinimizedStore";
 
 // ----- STORE INTEGRATION -----
 const loadingStore = useLoadingStore();
@@ -129,7 +129,7 @@ function processFetchedData(allRoomData: RoomData[]) {
   rooms.value = displayRooms;
   roomsHistory.value = historyMap;
   latestFetch.value = new Date();
-  selectedRoom.value = historyMap[selectedRoom.roomId]
+  selectedRoom.value = historyMap[selectedRoom.roomId];
 }
 
 // ----- WebSocket -----
@@ -385,9 +385,11 @@ function subscribeToRoom(roomId: string) {
 
     if (Array.isArray(data)) {
       if (data.length > 1) {
-        data.sort(
+        data
+          .sort(
             (a, b) => new Date(a.timeStamp).getTime() - new Date(b.timeStamp).getTime()
-        ).reverse();
+          )
+          .reverse();
       }
       data = data[0];
       console.error("sethereuma", data);
@@ -499,9 +501,11 @@ watch(
     <!-- Statistic Cards -->
     <div
       v-if="selectedRoom"
-      class="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-center"
+      :class="[
+        'mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-center',
+        { 'h-[90vh] flex justify-center items-center': minimizedStore.isMinimized },
+      ]"
     >
-
       <StatisticCard
         v-for="card in cards"
         :key="card.title"
@@ -549,5 +553,12 @@ watch(
 
 button:focus {
   outline: none;
+}
+
+.minimized-layout {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
