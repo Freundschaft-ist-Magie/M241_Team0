@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useUserStore } from "~/utils/stores/UserStore";
 import { useConfirmStore } from "~/utils/stores/base/ConfirmStore";
-import { useUserStore } from "~/utils/stores/UserStore";
 
 const dialog = useDialog();
 
