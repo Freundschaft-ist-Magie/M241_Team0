@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { usePageSettingsStore } from "~/utils/stores/base/PageSettingsStore";
-import {useMinimizedStore} from "~/utils/stores/base/MinimizedStore";
+import { useMinimizedStore } from "~/utils/stores/base/MinimizedStore";
 
 const pageSettingsStore = usePageSettingsStore();
 
@@ -83,24 +83,21 @@ watch(showMaxButton, (newValue) => {
     }, 2000); // 2 Sekunden
   }
 });
-
-
 </script>
 
 <template>
   <div
-      class="w-full h-20 fixed top-0 left-0 z-50 flex justify-center items-center"
-      v-if="minimizedStore.isMinimized"
-      @mousemove="showMaxButton = true"
-      @mouseleave="showMaxButton = false"
+    class="w-full h-20 fixed top-0 left-0 z-50 flex justify-center items-center"
+    v-if="minimizedStore.isMinimized"
+    @mousemove="showMaxButton = true"
+    @mouseleave="showMaxButton = false"
   >
-
     <transition name="fade-in-top">
       <Button
-          v-if="showMaxButton"
-          @click="minimizedStore.setMinimized(false)"
-          class="absolute top-0 right-0 m-2"
-          icon="pi pi-window-maximize"
+        v-if="showMaxButton"
+        @click="minimizedStore.setMinimized(false)"
+        class="absolute top-0 right-0 m-2"
+        icon="pi pi-window-maximize"
       />
     </transition>
   </div>
@@ -142,7 +139,6 @@ watch(showMaxButton, (newValue) => {
           <circle cx="8" cy="8" r="8" />
         </svg>
         <span class="text-base">{{ isServerOnline ? "Online" : "Offline" }}</span>
-        <Button icon="pi pi-arrow-up" class="p-0! m-0! bg-transparent! border-0!" @click="minimizedStore.setMinimized(true)"></Button>
         <i class="pi pi-question-circle"></i>
       </div>
       <Popover ref="serverStatusPopover">
@@ -151,6 +147,13 @@ watch(showMaxButton, (newValue) => {
           erreichbar, werden die Daten nicht aktualisiert.
         </span>
       </Popover>
+
+      <Button
+        icon="pi pi-sort-alt"
+        class="p-0! m-0! bg-transparent! border-0!"
+        severity="secondary"
+        @click="minimizedStore.setMinimized(true)"
+      ></Button>
 
       <div class="flex gap-2 items-center">
         <Button
