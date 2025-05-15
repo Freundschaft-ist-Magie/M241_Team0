@@ -9,6 +9,7 @@ using M241.Server.Data;
 using M241.Server.Data.Models;
 using M241.Server.Common.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using M241.Server.Services;
 
 namespace M241.Server.Controllers
 {
@@ -17,10 +18,12 @@ namespace M241.Server.Controllers
     public class RoomsController : ControllerBase
     {
         private readonly AeroSenseDbContext _context;
+        private readonly MqttService _mqttService;
 
-        public RoomsController(AeroSenseDbContext context)
+        public RoomsController(AeroSenseDbContext context, MqttService mqttService)
         {
             _context = context;
+            _mqttService = mqttService;
         }
 
         [HttpGet]
@@ -40,6 +43,13 @@ namespace M241.Server.Controllers
             }
 
             return room;
+        }
+
+        [HttpGet("ping/{macAddress}")]
+        public async Task<ActionResult<Room>> GetRoom(string macAddress)
+        {
+            await _mqttService.PingRoom(macAddress);
+            return Ok();
         }
 
         [HttpPut("{id}")]
