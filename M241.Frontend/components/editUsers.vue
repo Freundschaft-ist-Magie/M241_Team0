@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useUserStore } from "~/utils/stores/UserStore";
 import { useConfirmStore } from "~/utils/stores/base/ConfirmStore";
-import EditUser from "./Modal/EditUser.vue";
+import { useUserStore } from "~/utils/stores/UserStore";
 
 const dialog = useDialog();
 
