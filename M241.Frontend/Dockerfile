@@ -12,7 +12,7 @@ RUN npm i
 
 # Copy the entire project
 COPY . ./
-RUN echo "VITE_API_URL=\"rpi.m241.api64.de\"" > ./.env
+RUN echo "VITE_API_URL=\"aircheck.jzel.ch\"" > ./.env
 RUN echo "VITE_API_ENDPOINT_PREFIX=\"api/\"" >> ./.env
 RUN echo "VITE_API_PROTOCOL=\"https://\"" >> ./.env
 RUN echo "VITE_API_WSPROTOCOL=\"wss://\"" >> ./.env
