@@ -3,4 +3,5 @@
 #define MQTT_HOST "rpi.m241.api64.de"
 #define MQTT_PORT 8883
 #define MQTT_QUEUE "room/data"
+#define MQTT_PING_TOPIC "room/ping"
 #define DEBUGGING_ENABLED false

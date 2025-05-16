@@ -17,7 +17,10 @@ const char* mqttPass = MQTT_PASS;
 const char* mqttHost = MQTT_HOST;
 const int mqttPort = MQTT_PORT;
 const char* mqttQueue = MQTT_QUEUE;
+const char* mqttPingTopic = MQTT_PING_TOPIC;
 const boolean debuggingEnabled = DEBUGGING_ENABLED;
+
+#define SENSOR_POWER_PIN 8
 
 String macAddress;
 WiFiSSLClient wiFiClient;
@@ -32,15 +35,22 @@ void setup() {
     while (!Serial);
   }
 
-  initSensor();
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(SENSOR_POWER_PIN, OUTPUT);
+  digitalWrite(SENSOR_POWER_PIN, HIGH);
+  delay(150);
 
+  initSensor();
   macAddress = getMacAddress();
+  Serial.print("MAC address: ");
+  Serial.println(macAddress);
   connectWiFi();
 
   timeClient.begin();
   timeClient.update();
 
   mqttClient.begin(mqttHost, mqttPort, wiFiClient);
+  mqttClient.onMessage(messageReceived);
   connectMqtt();
 }
 
@@ -65,11 +75,40 @@ void loop() {
   delay(1000);
 }
 
+void messageReceived(String &topic, String &payload) {
+  if (topic == mqttPingTopic && payload == macAddress) {
+    Serial.println("Received ping → LED blink");
+    deactivateSensor();
+
+    for (int i = 0; i < 15; i++) {
+      digitalWrite(LED_BUILTIN, HIGH);
+      delay(100);
+      digitalWrite(LED_BUILTIN, LOW);
+      delay(100);
+    }
+
+    pinMode(LED_BUILTIN, INPUT);
+
+    digitalWrite(SENSOR_POWER_PIN, HIGH);
+    delay(150);
+    initSensor();
+  }
+}
+
 void initSensor() {
   if (!bme.begin()) {
     Serial.println("Could not find a valid BME680 sensor, check wiring!");
     while (1);
   }
+}
+
+void deactivateSensor() {
+    digitalWrite(SENSOR_POWER_PIN, LOW);
+    delay(100);
+    pinMode(13, OUTPUT);
+    pinMode(11, OUTPUT);
+    pinMode(12, OUTPUT);
+    pinMode(10, OUTPUT);
 }
 
 String getMacAddress() {
@@ -112,6 +151,7 @@ void connectMqtt() {
     }
   }
   Serial.println("MQTT connection established!");
+  mqttClient.subscribe(mqttPingTopic);
 }
 
 bool attemptMqttConnection() {
