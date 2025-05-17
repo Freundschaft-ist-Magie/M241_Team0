@@ -5,6 +5,7 @@ To start this project in production, create an .env in the root of the folder. A
 To deploy, make sure docker is installed and start the release compose:
 
 ``` sh
+    docker compose -f .\docker-compose.yml -f .\docker-compose.release.yml pull
     docker compose -f .\docker-compose.yml -f .\docker-compose.release.yml up -d --build
 ```
 
