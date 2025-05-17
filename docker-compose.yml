@@ -14,7 +14,11 @@ services:
       - mosquitto
       - postgres
   mosquitto:
-    build: ./M241.Broker
+    build: 
+     context: .
+     dockerfile: ./M241.Broker/Dockerfile
+     args:
+        CERTPATH: ${CERTPATH}
     environment:
       - MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME:-mosquitto}
       - MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD:-admin}
