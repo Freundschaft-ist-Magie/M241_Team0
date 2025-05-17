@@ -7,6 +7,7 @@ using MQTTnet;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 
 namespace M241.Server.Services
 {
@@ -104,6 +105,15 @@ namespace M241.Server.Services
 
         public async Task PingRoom(string macAddress)
         {
+            try
+            {
+                var response = await _client.ConnectAsync(_options);
+                _logger.LogInformation("MQTT Result {0}", response.ResultCode);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("MQTT connection could not be established. Ex: {0}", e);
+            }
             if (_client.IsConnected)
             {
                 var message = new MqttApplicationMessageBuilder()
