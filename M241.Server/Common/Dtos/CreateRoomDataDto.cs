@@ -17,6 +17,8 @@ namespace M241.Server.Common.Dtos
         public float Gas { get; set; }
         [JsonPropertyName("macAddress")]
         public string MACAddress { get; set; }
+        [JsonPropertyName("timestamp")]
+        public long TimeStamp { get; set; } = 0;
 
         public RoomData MapToRoomData(Room room)
         {
@@ -29,6 +31,20 @@ namespace M241.Server.Common.Dtos
                 Gas = Gas,
                 Temperature = Temperature,
                 TimeStamp = DateTime.Now.ToUniversalTime(),
+            };
+        }
+
+        public RoomData MapToRoomData(Room room, DateTime timeStamp)
+        {
+            return new RoomData
+            {
+                Id = Id,
+                Humidity = Humidity,
+                Pressure = Pressure,
+                Room = room,
+                Gas = Gas,
+                Temperature = Temperature,
+                TimeStamp = timeStamp,
             };
         }
     }

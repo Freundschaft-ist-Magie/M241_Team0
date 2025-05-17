@@ -3,7 +3,8 @@
   "teamName": "Team:0",
   "Version": "1.0.0",
   "countdown": {
-    "timerSeconds": 30
+    "timerSeconds": 30,
+    "criticalDelaylMs": 2500
   },
   "temperature": {
     "title": "Temperatur",
@@ -62,9 +63,9 @@
     "chartColor": "#3357FF"
   },
   "compGas": {
-    "title": "Luftqualität",
+    "title": "Luftqualitäts-Index",
     "icon": "mdi:clouds",
-    "unit": "",
+    "unit": "IAQ",
     "normalRange": {
       "low": 5,
       "high": 20

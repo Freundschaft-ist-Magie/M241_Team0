@@ -1,49 +1,24 @@
 import { defineStore } from "pinia";
+import { get, post, put } from "~/utils/services/base/ApiService";
 import { useToastStore } from "./base/ToastStore";
+import User from "~/models/User";
 
 export const useUserStore = defineStore("user", () => {
-  const users = ref([
-    {
-      id: 1,
-      name: "Benutzer",
-      email: "benutzer@example.com",
-      roles: [
-        {
-          id: 1,
-          name: "Leser",
-          permissions: "Lesen",
-        },
-      ],
-    },
-    {
-      id: 2,
-      name: "Admin",
-      email: "admin@example.com",
-      roles: [
-        {
-          id: 2,
-          name: "Administrator",
-          permissions: "Administrator",
-        },
-      ],
-    },
-  ]);
+  const _userBaseUrl = "Users";
+  const _users = ref<User[]>([]);
 
-  const Users = computed(() => users.value);
+  const Users = computed(() => _users.value);
 
   async function GetAll() {
-    return users.value;
+    const users: User[] = await get(_userBaseUrl);
+
+    return users;
   }
 
-  async function Create(user: {
-    id: number;
-    name: string;
-    email: string;
-    roles: { id: number; name: string; permissions: string }[];
-  }) {
+  async function Create(user: User) {
     try {
-      user.id = users.value.length + 1;
-      users.value.push(user);
+      user.id = _users.value.length + 1;
+      _users.value.push(user);
 
       useToastStore().setToast(
         "success",

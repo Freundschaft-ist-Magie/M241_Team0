@@ -1,10 +1,10 @@
 services:
   m241.server:
-    image: jzeladminbbzw2006/aircheck-backend
+    image: ${CONTAINERREGISTRY}/aircheck-backend
     environment:
-      - FrontendUrl=https://rpi.m241.api64.de
+      - FrontendUrl=https://${URL}
   m241.frontend:
-    image: jzeladminbbzw2006/aircheck-frontend
+    image: ${CONTAINERREGISTRY}/aircheck-frontend
     ports:
       - 3000:80
   nginx:
@@ -14,8 +14,8 @@ services:
       - "443:443"
     volumes:
       - ./nginx.secure.conf:/etc/nginx/nginx.conf:ro
-      - /etc/ssl/rpi.m241.api64.de.crt:/etc/ssl/rpi.crt:ro
-      - /etc/ssl/private/rpi.m241.api64.de.key:/etc/ssl/private/rpi.key:ro
+      - ${CERTPATH}/fullchain.pem:/etc/ssl/rpi.pem:ro
+      - ${CERTPATH}/privkey.pem:/etc/ssl/private/rpi.pem:ro
     depends_on:
       - m241.server
       - m241.frontend

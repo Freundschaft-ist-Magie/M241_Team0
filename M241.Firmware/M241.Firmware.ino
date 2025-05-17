@@ -4,7 +4,9 @@
 #include <Adafruit_BME680.h>
 #include <Arduino_JSON.h>
 #include <WiFiNINA.h>
-#include <PubSubClient.h>
+#include <MQTTClient.h>
+#include <WiFiUdp.h>
+#include <NTPClient.h>
 #include "secrets.h"
 #include "config.h"
 
@@ -15,30 +17,47 @@ const char* mqttPass = MQTT_PASS;
 const char* mqttHost = MQTT_HOST;
 const int mqttPort = MQTT_PORT;
 const char* mqttQueue = MQTT_QUEUE;
+const char* mqttPingTopic = MQTT_PING_TOPIC;
 const boolean debuggingEnabled = DEBUGGING_ENABLED;
 
-String macAddress;
-WiFiClient wiFiClient;
+#define SENSOR_POWER_PIN 8
 
+String macAddress;
+WiFiSSLClient wiFiClient;
+MQTTClient mqttClient(1024);
 Adafruit_BME680 bme(10);
-PubSubClient mqttClient(wiFiClient);
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", 0, 60000);
 
 void setup() {
   Serial.begin(9600);
-  if(debuggingEnabled) {
+  if (debuggingEnabled) {
     while (!Serial);
   }
 
-  initSensor();
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(SENSOR_POWER_PIN, OUTPUT);
+  digitalWrite(SENSOR_POWER_PIN, HIGH);
+  delay(150);
 
+  initSensor();
   macAddress = getMacAddress();
+  Serial.print("MAC address: ");
+  Serial.println(macAddress);
   connectWiFi();
 
-  mqttClient.setServer(mqttHost, mqttPort);
+  timeClient.begin();
+  timeClient.update();
+
+  mqttClient.begin(mqttHost, mqttPort, wiFiClient);
+  mqttClient.onMessage(messageReceived);
   connectMqtt();
 }
 
 void loop() {
+  timeClient.update();
+  mqttClient.loop();
+
   if (bme.performReading()) {
     if (WiFi.status() == WL_CONNECTED) {
       if (mqttClient.connected()) {
@@ -52,6 +71,28 @@ void loop() {
   } else {
     Serial.println("Failed to perform BME680 sensor reading :(");
   }
+
+  delay(1000);
+}
+
+void messageReceived(String &topic, String &payload) {
+  if (topic == mqttPingTopic && payload == macAddress) {
+    Serial.println("Received ping → LED blink");
+    deactivateSensor();
+
+    for (int i = 0; i < 15; i++) {
+      digitalWrite(LED_BUILTIN, HIGH);
+      delay(100);
+      digitalWrite(LED_BUILTIN, LOW);
+      delay(100);
+    }
+
+    pinMode(LED_BUILTIN, INPUT);
+
+    digitalWrite(SENSOR_POWER_PIN, HIGH);
+    delay(150);
+    initSensor();
+  }
 }
 
 void initSensor() {
@@ -59,6 +100,15 @@ void initSensor() {
     Serial.println("Could not find a valid BME680 sensor, check wiring!");
     while (1);
   }
+}
+
+void deactivateSensor() {
+    digitalWrite(SENSOR_POWER_PIN, LOW);
+    delay(100);
+    pinMode(13, OUTPUT);
+    pinMode(11, OUTPUT);
+    pinMode(12, OUTPUT);
+    pinMode(10, OUTPUT);
 }
 
 String getMacAddress() {
@@ -72,12 +122,12 @@ String getMacAddress() {
 void connectWiFi() {
   int wiFiStatus = WL_IDLE_STATUS;
   while (wiFiStatus != WL_CONNECTED) {
-    if(wiFiStatus != WL_IDLE_STATUS) {
+    if (wiFiStatus != WL_IDLE_STATUS) {
       delay(5000);
     }
     wiFiStatus = attemptWiFiConnection();
   }
-  
+
   Serial.print("Connected to network named: ");
   Serial.println(wiFiSsid);
   Serial.print("IP Address: ");
@@ -101,6 +151,7 @@ void connectMqtt() {
     }
   }
   Serial.println("MQTT connection established!");
+  mqttClient.subscribe(mqttPingTopic);
 }
 
 bool attemptMqttConnection() {
@@ -108,8 +159,7 @@ bool attemptMqttConnection() {
   Serial.print(mqttHost);
   Serial.print(":");
   Serial.println(mqttPort);
-  String clientId = "arduinoClient-" + macAddress;
-  return mqttClient.connect(clientId.c_str(), mqttUser, mqttPass);
+  return mqttClient.connect(("arduinoClient-" + macAddress).c_str(), mqttUser, mqttPass);
 }
 
 void reconnectWiFi() {
@@ -124,13 +174,16 @@ void reconnectMqtt() {
 
 void publishSensorData() {
   JSONVar json;
-  json["id"] = 0;
   json["macAddress"] = macAddress;
+  json["timestamp"] = timeClient.getEpochTime();
   json["temperature"] = bme.temperature;
   json["humidity"] = bme.humidity;
   json["pressure"] = bme.pressure;
   json["gas"] = bme.gas_resistance;
 
-  mqttClient.publish(mqttQueue, JSON.stringify(json).c_str());
-  Serial.println("Published data");
+  if (mqttClient.publish(mqttQueue, JSON.stringify(json).c_str(), false, 2)) {
+    Serial.println("Published data (QoS = exactly once)");
+  } else {
+    Serial.println("Failed to publish");
+  }
 }

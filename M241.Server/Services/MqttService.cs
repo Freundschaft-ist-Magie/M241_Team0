@@ -7,6 +7,7 @@ using MQTTnet;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 
 namespace M241.Server.Services
 {
@@ -24,9 +25,17 @@ namespace M241.Server.Services
             _client = new MqttClientFactory().CreateMqttClient();
 
             _options = new MqttClientOptionsBuilder()
-                .WithTcpServer(configuration["MQTT:server"], 1883)
+                .WithTcpServer(configuration["MQTT:server"], 8883)
                 .WithCredentials(configuration["MQTT:user"], configuration["MQTT:password"])
+                .WithWillQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
                 .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
+                .WithTlsOptions(tls => {
+                    tls.UseTls();
+                    tls.WithAllowUntrustedCertificates();
+                    tls.WithIgnoreCertificateChainErrors();
+                    tls.WithIgnoreCertificateRevocationErrors();
+                    tls.WithCertificateValidationHandler(_ => true);
+                })
                 .Build();
 
             _logger = logger;
@@ -62,8 +71,14 @@ namespace M241.Server.Services
                                 MACAddress = roomData.MACAddress,
                             };
                         }
-
-                        var newRoomData = roomData.MapToRoomData(room);
+                        DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(roomData.TimeStamp);
+                        DateTime localDateTime = dateTimeOffset.UtcDateTime;
+                        var newRoomData = roomData.MapToRoomData(room, localDateTime);
+                        if (context.RoomData.Any(r => r.TimeStamp == localDateTime))
+                        {
+                            _logger.LogInformation("Duplicate entry for {localDateTime} received.", localDateTime);
+                            return;
+                        }
                         context.RoomData.Add(newRoomData);
                         await context.SaveChangesAsync();
                         var newRoom = await context.RoomData.Include(r => r.Room).FirstOrDefaultAsync(n => n.Id == newRoomData.Id);
@@ -86,6 +101,28 @@ namespace M241.Server.Services
                 _logger.LogError("MQTT connection could not be established. Ex: {0}", e);
             }
 
+        }
+
+        public async Task PingRoom(string macAddress)
+        {
+            try
+            {
+                var response = await _client.ConnectAsync(_options);
+                _logger.LogInformation("MQTT Result {0}", response.ResultCode);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("MQTT connection could not be established. Ex: {0}", e);
+            }
+            if (_client.IsConnected)
+            {
+                var message = new MqttApplicationMessageBuilder()
+                    .WithTopic("room/ping")
+                    .WithPayload(Encoding.UTF8.GetBytes(macAddress))
+                    .Build();
+
+                await _client.PublishAsync(message);
+            }
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)

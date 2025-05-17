@@ -57,14 +57,13 @@ onMounted(async () => {
             <edit-users :roles="roles" :users="users" />
           </AccordionContent>
         </AccordionPanel>
-        <!--
+
         <AccordionPanel value="2">
           <AccordionHeader>Räume verwalten</AccordionHeader>
           <AccordionContent>
             <edit-devices />
           </AccordionContent>
         </AccordionPanel>
-        -->
       </Accordion>
     </div>
   </div>

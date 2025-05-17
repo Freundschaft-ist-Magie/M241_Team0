@@ -6,6 +6,13 @@ services:
       dockerfile: M241.Server/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+  m241.frontend:
+    image: ${DOCKER_REGISTRY-}m241frontend
+    build:
+      context: ./M241.Frontend
+      dockerfile: Dockerfile
+    ports:
+      - 3000:80
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: pgadmin

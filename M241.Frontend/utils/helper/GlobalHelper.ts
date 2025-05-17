@@ -70,11 +70,10 @@ class GlobalHelper {
   }
 
   public static MapCompGas(gasResistance: number, humidity: number) {
-    const gas_resistance_reading = gasResistance / 1000; // Convert to kiloohm
     const { title, icon, unit, normalRange, criticalText } = config.compGas;
 
     // value is in Pa we need to convert it in hPa
-    const compGas = Math.log(gas_resistance_reading) + 0.04 * humidity
+    const compGas = Math.log(gasResistance) + 0.04 * humidity
 
     return this.MapData(compGas, {
       title,
@@ -156,7 +155,7 @@ class GlobalHelper {
     const dataset = new Dataset(
       title,
       airQuality.map((reading) => {
-        return Number(reading.airQuality);
+        return Number(reading.airQuality) / 1000;
       }),
       false,
       isForecast ? forecastColor : chartColor,
@@ -182,7 +181,7 @@ class GlobalHelper {
     const dataset = new Dataset(
       title,
       pressure.map((reading) => {
-        return Number(reading.pressure);
+        return Number(reading.pressure) / 1000;
       }),
       false,
       isForecast ? forecastColor : chartColor,
@@ -339,6 +338,18 @@ class GlobalHelper {
     const day = date.getDate().toString().padStart(2, "0");
     const month = date.toLocaleString("de-DE", { month: "short" });
     return `${day}. ${month}`;
+  }
+
+  public static beautifyDate(timestamp: string): string {
+    const date = new Date(timestamp);
+    return date.toLocaleString("de-DE", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+    });
   }
 
 

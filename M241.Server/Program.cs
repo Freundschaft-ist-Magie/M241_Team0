@@ -5,6 +5,7 @@ using M241.Server.Data;
 using M241.Server.Data.Models;
 using M241.Server.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -30,6 +31,8 @@ var connectionstring = builder.Configuration.GetConnectionString("Default") ?? t
 builder.Services.AddDbContextFactory<AeroSenseDbContext>(opt =>
     opt.UseNpgsql(connectionstring));
 
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<AppUser>()
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AeroSenseDbContext>()
@@ -42,10 +45,16 @@ builder.Services.AddTransient(provider => new MapperConfiguration(cfg =>
 }).CreateMapper());
 
 builder.Services.AddTransient<AeroSenseDbContext>();
+builder.Services.AddTransient<MqttService>();
 builder.Services.AddHostedService<MqttService>();
 builder.Services.AddHealthChecks();
 string frontendUrl = builder.Configuration["FrontendUrl"] ??
     throw new ArgumentException("Missing frontend url in appsettings.");
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.SameSite = SameSiteMode.Lax;
+});
 
 
 builder.Services.AddCors(options => options.AddPolicy("SPA", policy => policy
@@ -71,13 +80,23 @@ if (true /*app.Environment.IsDevelopment()*/)
     }
 }
 
-app.UseAuthorization();
 app.UseAuthentication();
+app.UseAuthorization();
 app.UseCors("SPA");
 
 app.MapControllers();
 app.MapGroup("/api")
     .MapIdentityApi<AppUser>();
+app.MapPost("/api/logout", async (SignInManager<AppUser> signInManager,
+    [FromBody] object empty) =>
+{
+    if (empty != null)
+    {
+        await signInManager.SignOutAsync();
+        return Results.Ok();
+    }
+    return Results.Unauthorized();
+});
 
 
 app.UseAntiforgery();

@@ -5,6 +5,7 @@ import RoomData from "~/models/RoomData";
 export const useRoomDataStore = defineStore("roomData", () => {
   const _roomBaseUrl = "RoomDatas";
   const _roomDatas = ref([])
+  const _roomDatas2 = ref([])
   const roomDatas = computed(() => _roomDatas);
 
   async function GetAll() {
@@ -13,5 +14,11 @@ export const useRoomDataStore = defineStore("roomData", () => {
     return _roomDatas;
   }
 
-  return { roomDatas, GetAll };
+  async function GetLast20() {
+    const _roomDatas2: RoomData[] = await get(_roomBaseUrl + "?maxPageSize=20");
+
+    return _roomDatas2;
+  }
+
+  return { roomDatas, GetAll, GetLast20, _roomDatas2 };
 });
