@@ -2,6 +2,12 @@
 
 To start this project in production, create an .env in the root of the folder. An example .env is ready.
 
+Move the following SSL certificates inside the certs folder inside root:
+
+./certs/fullchain.pem
+
+./certs/privkey.pem
+
 To deploy, make sure docker is installed and start the release compose:
 
 ``` sh
