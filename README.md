@@ -1,12 +1,17 @@
 # M241 Team 0
 
-After cloning the repo, pull all submodules
+To start this project in production, create an .env in the root of the folder. An example .env is ready.
 
-git submodule update --init --recursive
+To deploy, make sure docker is installed and start the release compose:
 
-update submodule to latest commit:
+``` sh
+    docker compose -f .\docker-compose.yml -f .\docker-compose.release.yml up -d --build
+```
 
-git pull --recurse-submodules
+The frontend needs the url to the backend. This is currently hardcoded until a fix is found.
+Adjust the Backend URL inside M241.Frontend/Dockerfile:
+
+RUN echo "VITE_API_URL=\"{YOUR_URL}\"" > ./.env
 
 - [Firmware](./M241.Firmware/README.md)
 - [Client](./M241.Client/README.md)
