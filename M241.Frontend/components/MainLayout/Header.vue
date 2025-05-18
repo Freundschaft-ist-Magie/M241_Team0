@@ -51,13 +51,8 @@ const panelLinks = computed(() => {
 
 const checkServerHealth = async () => {
   try {
-    const response = await get("healthz");
-    if (response.ok) {
-      const text = await response.text();
-      isServerOnline.value = text.toLowerCase().includes("healthy");
-    } else {
-      isServerOnline.value = false;
-    }
+    const text = await get("healthz");
+    isServerOnline.value = text.toLowerCase().includes("healthy");
   } catch (error) {
     isServerOnline.value = false;
   }
