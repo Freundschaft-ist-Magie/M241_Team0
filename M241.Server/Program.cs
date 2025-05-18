@@ -66,18 +66,19 @@ builder.Services.AddCors(options => options.AddPolicy("SPA", policy => policy
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (true /*app.Environment.IsDevelopment()*/)
+if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "M241"));
-    using (var scope = app.Services.CreateScope())
-    {
-        var db = scope.ServiceProvider.GetRequiredService<AeroSenseDbContext>();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        await db.Database.MigrateAsync();
-        await SeedData.SeedDb(db, userManager, roleManager);
-    }
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AeroSenseDbContext>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    await db.Database.MigrateAsync();
+    await SeedData.SeedDb(db, userManager, roleManager);
 }
 
 app.UseAuthentication();

@@ -17,11 +17,13 @@ namespace M241.Server.Controllers
     {
         private readonly AeroSenseDbContext _context;
         private readonly IMapper _mapper;
+        private readonly ILogger<WebSocketController> _logger;
 
-        public WebSocketController(AeroSenseDbContext context, IMapper mapper)
+        public WebSocketController(AeroSenseDbContext context, IMapper mapper, ILogger<WebSocketController> logger)
         {
             _context = context;
             _mapper = mapper;
+            _logger = logger;
         }
 
         private async Task SendRoomData(WebSocket webSocket)
@@ -72,10 +74,17 @@ namespace M241.Server.Controllers
                 var buffer = new byte[1024 * 4];
                 while (webSocket.State == WebSocketState.Open)
                 {
-                    var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                    if (result.MessageType == WebSocketMessageType.Close)
+                    try
                     {
-                        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by client", CancellationToken.None);
+                        var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                        if (result.MessageType == WebSocketMessageType.Close)
+                        {
+                            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by client", CancellationToken.None);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError("Failed weboscket connection. {ex}", ex);
                     }
                 }
 
@@ -100,10 +109,17 @@ namespace M241.Server.Controllers
                 var buffer = new byte[1024 * 4];
                 while (webSocket.State == WebSocketState.Open)
                 {
-                    var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                    if (result.MessageType == WebSocketMessageType.Close)
+                    try
                     {
-                        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by client", CancellationToken.None);
+                        var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                        if (result.MessageType == WebSocketMessageType.Close)
+                        {
+                            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by client", CancellationToken.None);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError("Failed weboscket connection. {ex}", ex);   
                     }
                 }
 

@@ -19,3 +19,4 @@ services:
     depends_on:
       - m241.server
       - m241.frontend
+    restart: always
