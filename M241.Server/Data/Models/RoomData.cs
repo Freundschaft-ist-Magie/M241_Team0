@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace M241.Server.Data.Models
 {
@@ -30,5 +31,9 @@ namespace M241.Server.Data.Models
 
         [JsonPropertyName("roomId")]
         public int RoomId { get; set; }
+
+        [JsonPropertyName("isBurning")]
+        [NotMapped]
+        public bool IsBurning { get; set; }
     }
 }
