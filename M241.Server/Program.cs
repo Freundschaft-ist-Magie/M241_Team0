@@ -113,6 +113,6 @@ webSocketOptions.AllowedOrigins.Add(frontendUrl);
 
 app.UseWebSockets(webSocketOptions);
 
-app.MapHealthChecks("/healthz");
+app.MapHealthChecks("/api/healthz");
 
 app.Run();
