@@ -25,6 +25,14 @@ export const useRoomStore = defineStore("room", () => {
     return _rooms;
   }
 
+  // /Rooms/ping/{macAddress}
+  async function PingRoom(macAddress: string) {
+    // returns nothing but 200 OK
+    const res: string = await get(`${_roomBaseUrl}/ping/${macAddress}`);
 
-  return { rooms, GetAll, UpdateRoom };
+    return res;
+  }
+
+
+  return { rooms, GetAll, UpdateRoom, PingRoom };
 });

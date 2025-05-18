@@ -10,6 +10,7 @@ import { getConfig } from "~/utils/helper/ConfigLoader";
 import SocketService from "~/utils/services/base/SocketService";
 import RoomData from "~/models/RoomData";
 import { useMinimizedStore } from "~/utils/stores/base/MinimizedStore";
+import { useToastStore } from "~/utils/stores/base/ToastStore";
 
 // ----- STORE INTEGRATION -----
 const loadingStore = useLoadingStore();
@@ -47,6 +48,7 @@ const lastChartUpdate = ref<Date | null>(null);
 
 const latestFetch = ref<Date>(new Date(1, 1, 1970));
 const isBurning = ref(false);
+const isPingPending = ref(false);
 const selectedRoom = ref<DisplayRoom | null>(null);
 const countdown = ref(0);
 const rooms = ref<DisplayRoom[]>([]);
@@ -329,6 +331,30 @@ function startCountdown(countdownSeconds: number) {
   }, 1000);
 }
 
+// Add ping room handler
+async function handlePingRoom(room: DisplayRoom) {
+  try {
+    isPingPending.value = true;
+    const result = await roomStore.PingRoom(room.room.macAddress);
+
+    // since result is empty, we can assume the ping was successful
+    useToastStore().setToast(
+      "success",
+      "Ping erfolgreich",
+      `Raum ${room.roomId} ist erreichbar`
+    );
+  } catch (error) {
+    console.error("Failed to ping room:", error);
+    useToastStore().setToast(
+      "error",
+      "Ping fehlgeschlagen",
+      `Raum ${room.roomId} ist nicht erreichbar`
+    );
+  } finally {
+    isPingPending.value = false;
+  }
+}
+
 // ----- LIFECYCLE HOOK -----
 
 onMounted(async () => {
@@ -501,7 +527,9 @@ watch(
       :rooms="rooms"
       :selectedRoom="selectedRoom"
       :countdown="countdown"
+      :isPingPending="isPingPending"
       @roomSelected="roomSelected"
+      @pingRoom="handlePingRoom"
       v-if="!minimizedStore.isMinimized"
     />
 

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import Room from "~/models/Room";
-import RoomSelector from "~/components/RoomSelector.vue"; // falls nötig importieren
+import RoomSelector from "~/components/RoomSelector.vue";
 import { defineEmits } from "vue";
 
 defineProps<{
@@ -8,9 +8,10 @@ defineProps<{
   rooms: Room[];
   selectedRoom: Room;
   countdown: number;
+  isPingPending: boolean;
 }>();
 
-const emit = defineEmits(["roomSelected"]); // Das Event definieren
+const emit = defineEmits(["roomSelected", "pingRoom"]);
 
 function formatDate(date: Date) {
   return date.toLocaleString("de-CH", {
@@ -32,20 +33,32 @@ function handleRoomSelected(room: Room) {
   <div
     class="mt-4 p-4 bg-white shadow-md shadow-black/40 rounded-md flex justify-between items-center dark:bg-darkNeutral1 dark:text-darkNeutral2"
   >
-    <div>
-      <RoomSelector
-        :options="rooms"
-        :placeholder="'Raum auswählen'"
-        :filter-field="'roomId'"
-        :selectedRoom="selectedRoom"
-        @roomSelected="handleRoomSelected"
+    <div class="flex items-start gap-4">
+      <div class="flex-grow">
+        <RoomSelector
+          :options="rooms"
+          :placeholder="'Raum auswählen'"
+          :filter-field="'roomId'"
+          :selectedRoom="selectedRoom"
+          @roomSelected="handleRoomSelected"
+        />
+        <p class="text-gray-500 dark:text-darkSecondary2">
+          Zuletzt aktualisiert: {{ formatDate(latestFetch) }}
+        </p>
+        <p v-if="countdown >= 0" class="text-gray-400 text-sm dark:text-darkSecondary2">
+          Charts werden aktualisiert in {{ countdown }} Sekunden.
+        </p>
+      </div>
+      <Button
+        v-if="selectedRoom"
+        icon="pi pi-wifi"
+        @click="$emit('pingRoom', selectedRoom)"
+        :loading="isPingPending"
+        severity="secondary"
+        tooltip="Ping Room"
+        rounded
+        raised
       />
-      <p class="text-gray-500 dark:text-darkSecondary2">
-        Zuletzt aktualisiert: {{ formatDate(latestFetch) }}
-      </p>
-      <p v-if="countdown >= 0" class="text-gray-400 text-sm dark:text-darkSecondary2">
-        Charts werden aktualisiert in {{ countdown }} Sekunden.
-      </p>
     </div>
   </div>
 </template>
