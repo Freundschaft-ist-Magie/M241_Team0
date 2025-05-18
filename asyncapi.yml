@@ -2,10 +2,11 @@ asyncapi: 3.0.0
 id: 'Team0:AirCheck'
 info:
   title: AirCheck Sensor API
-  version: 1.0.0
-  description: >-
-    This API describes the interface between the AirCheck backend as the consumer
-    and its arbitrary publisher.
+  version: 1.1.0
+  description: >
+    This API describes the interface between the AirCheck backend and its devices.
+    The backend consumes sensor data and can send pings to specific Arduino publishers
+    to trigger a LED blink for locating the device.
   contact:
     email: jo.zeller@protonmail.com
     name: Johannes Zeller
@@ -22,7 +23,7 @@ servers:
   mosquitto:
     host: 'rpi.m241.api64.de:1883'
     protocol: mqtt
-    description: >-
+    description: >
       Mosquitto stores the messages that can be consumed by the AirCheck backend. In
       case the backend is not available, the messages will be stored until they are
       consumed.
@@ -36,6 +37,13 @@ channels:
         $ref: '#/components/messages/RoomData'
       receiveMessage.message.roomData:
         $ref: '#/components/messages/RoomData'
+  pingRequest:
+    address: 'room/ping'
+    messages:
+      sendMessage.message.pingRequest:
+        $ref: '#/components/messages/PingRequest'
+      receiveMessage.message.pingRequest:
+        $ref: '#/components/messages/PingRequest'
 operations:
   sendMessage:
     action: receive
@@ -53,6 +61,14 @@ operations:
     description: The AirCheck backend can consume the sensor data from the queue.
     messages:
       - $ref: '#/channels/sensorData/messages/receiveMessage.message.roomData'
+  pingDevice:
+    action: send
+    channel:
+      $ref: '#/channels/pingRequest'
+    summary: AirCheck backend sends ping to Arduino
+    description: The backend can send a ping request to a specific Arduino, which triggers it to blink.
+    messages:
+      - $ref: '#/channels/pingRequest/messages/sendMessage.message.pingRequest'
 components:
   securitySchemes:
     messageBrokerCreds:
@@ -61,15 +77,22 @@ components:
   messages:
     RoomData:
       name: RoomData
-      description: >-
+      description: >
         Message containing arbitrary publisher's sensor data which is thus submitted
         for creation at AirCheck
       payload:
         $ref: '#/components/schemas/RoomData'
+    PingRequest:
+      name: PingRequest
+      description: >
+        Message used to trigger a specific Arduino to blink for identification purposes.
+        The Arduino will only respond if the MAC address matches its own.
+      payload:
+        $ref: '#/components/schemas/PingRequest'
   schemas:
     RoomData:
       type: object
-      description: >-
+      description: >
         Sensor data which also includes the publisher's Mac address which is
         used for identification at AirCheck. A new Room record will automatically
         be created if a new Mac address is provided here.
@@ -93,7 +116,7 @@ components:
           format: int64
           description: Epoch time in seconds corresponding to the instant of the measurements (e.g. 1746687013 means 'Thu May 08 2025 06:50:13 GMT+0000')
           examples:
-            - '1746687013'
+            - 1746687013
         temperature:
           type: number
           format: float
@@ -117,4 +140,17 @@ components:
           format: int32
           description: The gas resistance in Ohms
           examples:
-            - 56960 Ohms
+            - 56960
+    PingRequest:
+      type: object
+      description: A request from the backend to trigger a blink on a specific Arduino
+      required:
+        - macAddress
+      properties:
+        macAddress:
+          type: string
+          description: The MAC address of the Arduino device that should react to the ping
+          minLength: 17
+          maxLength: 17
+          examples:
+            - 'd8:3a:dd:6d:7f:03'
