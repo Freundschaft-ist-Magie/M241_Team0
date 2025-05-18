@@ -199,7 +199,6 @@ function handleWebSocketMessage(newData: RoomData) {
   console.log("roomsHistory", historyEntry);
   isBurning.value = historyEntry.isBurning;
   console.log("isBurning", historyEntry.isBurning);
-  $;
 
   roomsHistory.value[roomIdStr].push(historyEntry);
   // Optional: Limit history size in memory

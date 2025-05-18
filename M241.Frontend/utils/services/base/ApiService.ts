@@ -14,6 +14,7 @@ const _makeApiCall = async (
 ): Promise<any> => {
   const authStore = useAuthStore();
   const toastStore = useToastStore();
+  const router = useRouter();
 
   try {
     const response = await $fetch(`${API_BASE_URL}${VITE_API_ENDPOINT_PREFIX}${endpoint}`, {
@@ -31,24 +32,32 @@ const _makeApiCall = async (
     console.info("API call successful:", response);
     return response;
   } catch (error: any) {
-    if (error.response?.status === 401 && authStore.refreshToken && retryCount < 1) {
-      console.warn("Access token expired, attempting refresh...");
+    if (error.response?.status === 401) {
+      if (authStore.refreshToken && retryCount < 1) {
+        console.warn("Access token expired, attempting refresh...");
 
-      try {
-        const refreshResponse = await $fetch(`${API_BASE_URL}/refresh`, {
-          method: "POST",
-          body: { refreshToken: authStore.refreshToken },
-        });
+        try {
+          const refreshResponse = await $fetch(`${API_BASE_URL}/refresh`, {
+            method: "POST",
+            body: { refreshToken: authStore.refreshToken },
+          });
 
-        const { accessToken } = refreshResponse;
-        authStore.accessToken = accessToken;
-        StorageService.set("accessToken", accessToken);
+          const { accessToken } = refreshResponse;
+          authStore.accessToken = accessToken;
+          StorageService.set("accessToken", accessToken);
 
-        return _makeApiCall(method, endpoint, data, params, retryCount + 1);
-      } catch (refreshError) {
-        console.error("Token refresh failed:", refreshError);
+          return _makeApiCall(method, endpoint, data, params, retryCount + 1);
+        } catch (refreshError) {
+          console.error("Token refresh failed:", refreshError);
+          authStore.clearUser();
+          router.push("/login");
+          throw refreshError;
+        }
+      } else {
+        console.warn("401 received without refresh possibility – redirecting to login.");
         authStore.clearUser();
-        throw refreshError;
+        router.push("/login");
+        throw error;
       }
     }
 
