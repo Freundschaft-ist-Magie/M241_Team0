@@ -46,6 +46,7 @@ let currentWsCallback: MessageCallback | null = null;
 const lastChartUpdate = ref<Date | null>(null);
 
 const latestFetch = ref<Date>(new Date(1, 1, 1970));
+const isBurning = ref(false);
 const selectedRoom = ref<DisplayRoom | null>(null);
 const countdown = ref(0);
 const rooms = ref<DisplayRoom[]>([]);
@@ -189,10 +190,17 @@ function handleWebSocketMessage(newData: RoomData) {
     humidity: newData.humidity,
     pressure: newData.pressure,
     airQuality: newData.gas,
+    isBurning: newData.isBurning,
   };
   if (!roomsHistory.value[roomIdStr]) {
     roomsHistory.value[roomIdStr] = [];
   }
+
+  console.log("roomsHistory", historyEntry);
+  isBurning.value = historyEntry.isBurning;
+  console.log("isBurning", historyEntry.isBurning);
+  $;
+
   roomsHistory.value[roomIdStr].push(historyEntry);
   // Optional: Limit history size in memory
   // const MAX_HISTORY_POINTS = 500;
@@ -499,46 +507,62 @@ watch(
     />
 
     <!-- Statistic Cards -->
-    <div
-      v-if="selectedRoom"
-      :class="[
-        'mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-center',
-        { 'h-[90vh] flex justify-center items-center': minimizedStore.isMinimized },
-      ]"
-    >
-      <StatisticCard
-        v-for="card in cards"
-        :key="card.title"
-        class="stat-card"
-        :title="card.title"
-        :value="card.value"
-        :icon="card.icon"
-        :unit="card.unit"
-        :normalRange="card.normalRange"
-        :criticalText="card.criticalText"
-      />
-    </div>
-
-    <!-- Placeholder if no room is selected -->
-    <div
-      v-else
-      class="mt-4 p-4 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-md text-center"
-    >
-      Bitte wählen Sie oben einen Raum aus, um Details anzuzeigen.
-    </div>
-
-    <!-- Data Display Area -->
-    <div v-if="selectedRoom && !minimizedStore.isMinimized" class="mt-4">
-      <!-- Fallback 2: No History Data for the selected room -->
-      <NoCharts v-if="!hasHistoryDataForSelectedRoom" :selectedRoom="selectedRoom" />
-
-      <!-- Display Table and Charts -->
-      <div v-else>
-        <!-- Room Table -->
-        <RoomTable :room-data="roomsHistory" :selected-room="selectedRoom" class="mt-4" />
-
-        <ChartsSection :tabs="tabs" :charts="charts" :chart-titles="chartTitles" />
+    <div v-if="!isBurning">
+      <div
+        v-if="selectedRoom"
+        :class="[
+          'mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-center',
+          { 'h-[90vh] flex justify-center items-center': minimizedStore.isMinimized },
+        ]"
+      >
+        <StatisticCard
+          v-for="card in cards"
+          :key="card.title"
+          class="stat-card"
+          :title="card.title"
+          :value="card.value"
+          :icon="card.icon"
+          :unit="card.unit"
+          :normalRange="card.normalRange"
+          :criticalText="card.criticalText"
+        />
       </div>
+
+      <!-- Placeholder if no room is selected -->
+      <div
+        v-else
+        class="mt-4 p-4 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-md text-center"
+      >
+        Bitte wählen Sie oben einen Raum aus, um Details anzuzeigen.
+      </div>
+
+      <!-- Data Display Area -->
+      <div v-if="selectedRoom && !minimizedStore.isMinimized" class="mt-4">
+        <!-- Fallback 2: No History Data for the selected room -->
+        <NoCharts v-if="!hasHistoryDataForSelectedRoom" :selectedRoom="selectedRoom" />
+
+        <!-- Display Table and Charts -->
+        <div v-else>
+          <!-- Room Table -->
+          <RoomTable
+            :room-data="roomsHistory"
+            :selected-room="selectedRoom"
+            class="mt-4"
+          />
+
+          <ChartsSection :tabs="tabs" :charts="charts" :chart-titles="chartTitles" />
+        </div>
+      </div>
+    </div>
+    <div v-else>
+      <Dialog
+        v-model:visible="isBurning"
+        modal
+        header="🔥🔥🔥🔥 DER RAUM BRENNT 🔥🔥🔥🔥"
+        :style="{ width: '75vw' }"
+      >
+        <Burning />
+      </Dialog>
     </div>
   </div>
 </template>

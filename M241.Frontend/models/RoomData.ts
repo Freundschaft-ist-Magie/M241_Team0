@@ -6,6 +6,7 @@ class RoomData {
   temperature: number;
   pressure: number;
   gas: number;
+  isBurning: boolean = false;
   timeStamp: string;
   room: Room | null;
   roomId: number;
