@@ -73,7 +73,7 @@ class GlobalHelper {
     const { title, icon, unit, normalRange, criticalText } = config.compGas;
 
     // value is in Pa we need to convert it in hPa
-    const compGas = Math.log(gasResistance) + 0.04 * humidity
+    const compGas = 500 - ((Math.max(0, Math.min(100, 100 - (Math.log(gasResistance) - 6) * 20)) + Math.max(0, Math.min(100, 100 - Math.abs(humidity - 40) * 2.5))) / 2) * 5;
 
     return this.MapData(compGas, {
       title,
