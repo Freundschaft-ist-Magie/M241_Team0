@@ -67,8 +67,8 @@
     "icon": "mdi:clouds",
     "unit": "IAQ",
     "normalRange": {
-      "low": 5,
-      "high": 20
+      "low": 10,
+      "high": 150
     },
     "criticalText": {
       "low": "Die Luftqualität ist schlecht. Lüften Sie den Raum, um die Luftqualität zu verbessern.",
