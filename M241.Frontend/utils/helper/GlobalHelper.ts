@@ -72,10 +72,28 @@ class GlobalHelper {
   public static MapCompGas(gasResistance: number, humidity: number) {
     const { title, icon, unit, normalRange, criticalText } = config.compGas;
 
-    // value is in Pa we need to convert it in hPa
-    const compGas = 500 - (Math.min(100, Math.max(0, (Math.log(gasResistance) - 5) * 20)) + Math.min(100, Math.max(0, 100 - Math.abs(humidity - 40) * 1.5))) / 2 * 5;
+    const humReference = 40;
+    const gasLowerLimit = 10000;
+    const gasUpperLimit = 300000;
 
-    return this.MapData(compGas, {
+    const humidityScore =
+        humidity >= 38 && humidity <= 42
+            ? 25
+            : humidity < 38
+                ? (0.25 / humReference) * humidity * 100
+                : ((-0.25 / (100 - humReference)) * humidity + 0.416666) * 100;
+
+    const gasScoreRaw = (
+        (0.75 / (gasUpperLimit - gasLowerLimit)) * gasResistance -
+        (gasLowerLimit * (0.75 / (gasUpperLimit - gasLowerLimit)))
+    ) * 100;
+
+    const gasScore = Math.max(0, Math.min(75, gasScoreRaw));
+
+    const airScore = humidityScore + gasScore;
+    const iaq = (100 - airScore) * 5;
+
+    return this.MapData(iaq, {
       title,
       icon,
       unit,
