@@ -35,6 +35,7 @@ interface ProcessedHistoryEntry {
   humidity: number;
   pressure: number;
   airQuality: number;
+  isBurning: boolean;
 }
 
 // ----- COMPONENT LOGIC -----
