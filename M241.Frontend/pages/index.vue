@@ -458,7 +458,8 @@ function subscribeToRoom(roomId: string) {
       data.gas,
       data.timeStamp,
       data.roomId,
-      data.room
+      data.room,
+      data.isBurning
     );
 
     handleWebSocketMessage(roomData);
