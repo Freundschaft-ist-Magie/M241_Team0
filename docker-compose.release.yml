@@ -3,10 +3,12 @@ services:
     image: ${CONTAINERREGISTRY}/aircheck-backend
     environment:
       - FrontendUrl=https://${URL}
+    restart: always
   m241.frontend:
     image: ${CONTAINERREGISTRY}/aircheck-frontend
     ports:
       - 3000:80
+    restart: always
   nginx:
     image: nginx:latest
     ports:
