@@ -585,12 +585,15 @@ watch(
     </div>
     <div v-else>
       <Dialog
-        v-model:visible="isBurning"
-        modal
-        header="🔥🔥🔥🔥 DER RAUM BRENNT 🔥🔥🔥🔥"
-        :style="{ width: '100vw' }"
+          v-model:visible="isBurning"
+          modal
+          header="🔥🔥🔥🔥 DER RAUM BRENNT 🔥🔥🔥🔥"
+          :style="{ width: '100vw', height: '90%' }"
+          contentStyle="height: 100%; overflow: hidden;"
       >
-        <Burning />
+        <div style="position: relative; width: 100%; height: 100%;">
+          <Burning />
+        </div>
       </Dialog>
     </div>
   </div>
