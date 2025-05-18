@@ -35,6 +35,7 @@ interface ProcessedHistoryEntry {
   humidity: number;
   pressure: number;
   airQuality: number;
+  isBurning: boolean;
 }
 
 // ----- COMPONENT LOGIC -----
@@ -457,7 +458,8 @@ function subscribeToRoom(roomId: string) {
       data.gas,
       data.timeStamp,
       data.roomId,
-      data.room
+      data.room,
+      data.isBurning
     );
 
     handleWebSocketMessage(roomData);
