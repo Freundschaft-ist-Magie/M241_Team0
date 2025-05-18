@@ -68,11 +68,11 @@
     "unit": "IAQ",
     "normalRange": {
       "low": 10,
-      "high": 150
+      "high": 200
     },
     "criticalText": {
-      "low": "Die Luftqualität ist schlecht. Lüften Sie den Raum, um die Luftqualität zu verbessern.",
-      "high": "Die Luftqualität ist ungewöhnlich gut. Überprüfen sie den Sensor."
+      "low": "Die Luftqualität ist ungewöhnlich gut. Überprüfen sie den Sensor.",
+      "high": "Die Luftqualität ist schlecht. Lüften Sie den Raum, um die Luftqualität zu verbessern."
     },
     "chartColor": "#3357FF"
   },
