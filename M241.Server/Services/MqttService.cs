@@ -82,7 +82,11 @@ namespace M241.Server.Services
                         context.RoomData.Add(newRoomData);
                         await context.SaveChangesAsync();
                         var newRoom = await context.RoomData.Include(r => r.Room).FirstOrDefaultAsync(n => n.Id == newRoomData.Id);
-                        if(newRoom != null && newRoom.Temperature >= 50)
+                        if(newRoomData.Temperature >= 50)
+                        {
+                            newRoomData.IsBurning = true;
+                        }
+                        if (newRoom != null && newRoom.Temperature >= 50)
                         {
                             if(newRoom.Room != null)
                             {
@@ -90,7 +94,7 @@ namespace M241.Server.Services
                             }
                             newRoom.IsBurning = true;
                         }
-                        await WebSocketService.UpdateSockets(newRoomData, _logger);
+                        await WebSocketService.UpdateSockets(newRoom ?? newRoomData, _logger);
                     }
                 }
                 catch (Exception ex)
