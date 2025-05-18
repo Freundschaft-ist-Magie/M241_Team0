@@ -342,14 +342,14 @@ async function handlePingRoom(room: DisplayRoom) {
     useToastStore().setToast(
       "success",
       "Ping erfolgreich",
-      `Raum ${room.roomId} ist erreichbar`
+      `Falls das Gerät des Raums ${room.roomId} verbunden ist, sollte dieses blinken.`
     );
   } catch (error) {
     console.error("Failed to ping room:", error);
     useToastStore().setToast(
       "error",
       "Ping fehlgeschlagen",
-      `Raum ${room.roomId} ist nicht erreichbar`
+      `Das Gerät des Raums ${room.roomId} konnte nicht gepingt werden.`
     );
   } finally {
     isPingPending.value = false;
