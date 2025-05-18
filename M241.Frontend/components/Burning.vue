@@ -117,12 +117,12 @@
 /* General Image Styles */
 .crazy-gif {
   position: absolute;
-  width: 100px;
+  width: 200px;
   animation: spin 2s linear infinite, shake 0.5s infinite;
 }
 
 .melting-clock {
-  width: 120px;
+  width: 420px;
   animation: none;
 }
 
@@ -136,18 +136,18 @@
   animation: popUp 0.5s ease-out;
 }
 
-#skull1 { top: 10%; left: 10%; width: 80px; }
-#skull2 { top: 70%; left: 80%; width: 120px; animation-duration: 1.5s; }
+#skull1 { top: 20%; left: 10%; width: 150px; }
+#skull2 { top: 60%; left: 80%; width: 200px; animation-duration: 1.5s; }
 #clock1 { top: 5%; right: 5%; }
 #cat1 { top: 50%; left: -150px; }
-#explosion1 { top: 40%; left: 40%; width: 250px; }
-#dancing-skeleton1 { top: 65%; left: 5%; width: 150px; animation: shake 0.3s infinite alternate; }
+#explosion1 { top: 30%; left: 40%; width: 300px; }
+#dancing-skeleton1 { bottom: 10%; left: 5%; width: 300px; animation: shake 0.3s infinite alternate; }
 
 #falling-brick {
   position: absolute;
   top: -100px;
   left: 50%;
-  width: 50px;
+  width: 350px;
   animation: fall 3s linear infinite;
   z-index: 200;
 }
@@ -165,8 +165,8 @@
 }
 
 #text1 { top: 40%; left: 15%; transform: rotate(7deg); font-size: 1.2vw; }
-#text2 { top: 60%; right: 10%; transform: rotate(-3deg); font-size: 1.8vw; }
-#text3 { bottom: 5%; left: 30%; font-size: 1.4vw; text-transform: uppercase; }
+#text2 { top: 50%; right: 10%; transform: rotate(-3deg); font-size: 1.8vw; }
+#text3 { bottom: 2%; left: 15%; font-size: 1.4vw; text-transform: uppercase; }
 
 .warning-sign {
   position: absolute;
@@ -177,12 +177,12 @@
   padding: 15px;
   font-weight: bold;
   text-transform: uppercase;
-  animation: blink-background 0.5s infinite;
+  animation: blink-background 0.2s infinite;
   z-index: 70;
 }
 
 #warning1 { top: 2%; left: 2%; transform: rotate(-10deg); }
-#warning2 { bottom: 2%; right: 2%; transform: rotate(8deg); font-size: 2.5vw; }
+#warning2 { bottom: 4%; right: 2%; transform: rotate(8deg); font-size: 2.5vw; }
 
 .glitch-overlay {
   position: absolute;
