@@ -17,9 +17,9 @@ namespace M241.Server.Controllers
     {
         private readonly AeroSenseDbContext _context;
         private readonly IMapper _mapper;
-        private readonly ILogger _logger;
+        private readonly ILogger<WebSocketController> _logger;
 
-        public WebSocketController(AeroSenseDbContext context, IMapper mapper, ILogger logger)
+        public WebSocketController(AeroSenseDbContext context, IMapper mapper, ILogger<WebSocketController> logger)
         {
             _context = context;
             _mapper = mapper;
