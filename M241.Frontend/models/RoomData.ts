@@ -6,7 +6,7 @@ class RoomData {
   temperature: number;
   pressure: number;
   gas: number;
-  isBurning: boolean = false;
+  isBurning: boolean;
   timeStamp: string;
   room: Room | null;
   roomId: number;
@@ -19,7 +19,8 @@ class RoomData {
     gas: number,
     timeStamp: string,
     roomId: number,
-    room: object
+    room: object,
+    isBurning: boolean
   ) {
     this.id = id;
     this.humidity = humidity;
@@ -29,6 +30,7 @@ class RoomData {
     this.timeStamp = timeStamp;
     this.roomId = roomId;
     this.room = room;
+    this.isBurning = isBurning;
   }
 }
 
