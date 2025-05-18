@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { usePageSettingsStore } from "~/utils/stores/base/PageSettingsStore";
 import { useMinimizedStore } from "~/utils/stores/base/MinimizedStore";
+import { get } from "~/utils/services/base/ApiService";
 
 const pageSettingsStore = usePageSettingsStore();
 
@@ -50,15 +51,8 @@ const panelLinks = computed(() => {
 
 const checkServerHealth = async () => {
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_PROTOCOL}${import.meta.env.VITE_API_URL}/healthz`
-    );
-    if (response.ok) {
-      const text = await response.text();
-      isServerOnline.value = text.toLowerCase().includes("healthy");
-    } else {
-      isServerOnline.value = false;
-    }
+    const text = await get("healthz");
+    isServerOnline.value = text.toLowerCase().includes("healthy");
   } catch (error) {
     isServerOnline.value = false;
   }
