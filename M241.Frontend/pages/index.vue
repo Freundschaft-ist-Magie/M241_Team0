@@ -586,7 +586,7 @@ watch(
         v-model:visible="isBurning"
         modal
         header="🔥🔥🔥🔥 DER RAUM BRENNT 🔥🔥🔥🔥"
-        :style="{ width: '75vw' }"
+        :style="{ width: '100vw' }"
       >
         <Burning />
       </Dialog>
