@@ -47,7 +47,16 @@ watch(isCritical, (newValue, oldValue) => {
 onMounted(async () => {
   const config = await getConfig();
   if (config) {
-    CRITICAL_DELAY.value = config.countdown?.criticalDelaylMs;
+    CRITICAL_DELAY.value = config.countdown?.criticalDelaylMs ?? 0;
+
+    if (isCritical.value) {
+      criticalTimerId = setTimeout(() => {
+        if (isCritical.value) {
+          showCriticalMessage.value = true;
+        }
+        criticalTimerId = null;
+      }, CRITICAL_DELAY.value);
+    }
   } else {
     console.error("Failed to load configuration");
   }
