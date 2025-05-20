@@ -58,12 +58,14 @@ onMounted(() => {
         </div>
       </div>
       <span v-else class="text-3xl font-bold text-black dark:text-darkNeutral2">
-        {{ options && options.length > 0 ? "Room " + options[0].room.macAddress : "No data" }}
+        {{
+          options && options.length > 0 ? "Room " + options[0].room.macAddress : "No data"
+        }}
       </span>
     </template>
     <template #option="slotProps">
       <div class="flex items-center text-black dark:text-darkNeutral2">
-        Room {{ slotProps.option.room.macAddress }}
+        Room {{ slotProps.option.room.macAddress }}, {{ slotProps.option.room.name }}
       </div>
     </template>
   </Select>
