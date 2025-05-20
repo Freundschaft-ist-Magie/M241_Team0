@@ -65,7 +65,16 @@ onMounted(() => {
     </template>
     <template #option="slotProps">
       <div class="flex items-center text-black dark:text-darkNeutral2">
-        Room {{ slotProps.option.room.name }}, {{ slotProps.option.room.macAddress }}
+        Raum
+        <template v-if="slotProps.option.room.name">
+          {{ " " + slotProps.option.room.name }}
+        </template>
+        <template v-if="slotProps.option.room.name && slotProps.option.room.macAddress">
+          ,
+        </template>
+        <template v-if="slotProps.option.room.macAddress">
+          {{ " " + slotProps.option.room.macAddress }}
+        </template>
       </div>
     </template>
   </Select>
