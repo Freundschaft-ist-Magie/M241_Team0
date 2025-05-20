@@ -65,7 +65,7 @@ onMounted(() => {
     </template>
     <template #option="slotProps">
       <div class="flex items-center text-black dark:text-darkNeutral2">
-        Room {{ slotProps.option.room.macAddress }}, {{ slotProps.option.room.name }}
+        Room {{ slotProps.option.room.name }}, {{ slotProps.option.room.macAddress }}
       </div>
     </template>
   </Select>
