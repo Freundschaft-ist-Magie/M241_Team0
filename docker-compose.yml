@@ -22,8 +22,8 @@ services:
       args:
         CERTPATH: ${CERTPATH}
     environment:
-      - MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME:-mosquitto}
-      - MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD:-admin}
+      - MOSQUITTO_USERNAME=${MQTT_USER:-mosquitto}
+      - MOSQUITTO_PASSWORD=${MQTT_PASSWORD:-admin}
     volumes:
       - mosquitto_data:/mosquitto/data
       - mosquitto_log:/mosquitto/log
