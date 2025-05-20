@@ -35,7 +35,7 @@
     "chartColor": "#3357FF"
   },
   "airQuality": {
-    "title": "Luftwiderstand",
+    "title": "Luftwiderstand (höher=besser)",
     "icon": "mdi:air-filter",
     "unit": "kΩ",
     "normalRange": {
@@ -63,12 +63,12 @@
     "chartColor": "#3357FF"
   },
   "compGas": {
-    "title": "Luftqualitäts-Index (Schätzung)",
+    "title": "Luftqualitäts-Index-Schätzung (niedriger=besser)",
     "icon": "mdi:clouds",
     "unit": "IAQ",
     "normalRange": {
       "low": 10,
-      "high": 200
+      "high": 250
     },
     "criticalText": {
       "low": "Die Luftqualität ist ungewöhnlich gut. Überprüfen sie den Sensor.",
