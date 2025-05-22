@@ -2,27 +2,28 @@ services:
   m241.server:
     image: jzeladminbbzw2006/aircheck-backend
     environment:
-      - ConnectionStrings__Default=Host=postgres;Port=5432;Database=m241;Username=dbuser;Password=admin;
+      - ConnectionStrings__Default=${CONNECTIONSTRING:-Host=postgres;Port=5432;Database=m241;Username=dbuser;Password=admin;}
       - ASPNETCORE_ENVIRONMENT=Release
       - ASPNETCORE_HTTP_PORTS=80
       - MQTT__server=mosquitto
-      - MQTT__user=mosquitto
-      - MQTT__password=admin
+      - MQTT__user=${MQTT_USER:-mosquitto}
+      - MQTT__password=${MQTT_PASSWORD:-admin}
     ports:
       - "8081:80"
     depends_on:
       - mosquitto
       - postgres
     restart: always
+
   mosquitto:
     build: 
-     context: .
-     dockerfile: ./M241.Broker/Dockerfile
-     args:
+      context: .
+      dockerfile: ./M241.Broker/Dockerfile
+      args:
         CERTPATH: ${CERTPATH}
     environment:
-      - MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME:-mosquitto}
-      - MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD:-admin}
+      - MOSQUITTO_USERNAME=${MQTT_USER:-mosquitto}
+      - MOSQUITTO_PASSWORD=${MQTT_PASSWORD:-admin}
     volumes:
       - mosquitto_data:/mosquitto/data
       - mosquitto_log:/mosquitto/log
@@ -30,6 +31,7 @@ services:
       - 8883:8883
       - 9002:9001
     restart: always
+
   postgres:
     image: postgres:14-alpine
     ports:
@@ -37,9 +39,9 @@ services:
     volumes:
       - m241_db:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD=admin
-      - POSTGRES_USER=dbuser
-      - POSTGRES_DB=m241
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-admin}
+      - POSTGRES_USER=${POSTGRES_USER:-dbuser}
+      - POSTGRES_DB=${POSTGRES_DB:-m241}
     restart: always
 
 volumes:
