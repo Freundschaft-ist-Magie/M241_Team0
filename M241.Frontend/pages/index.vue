@@ -53,6 +53,12 @@ const isPingPending = ref(false);
 const selectedRoom = ref<DisplayRoom | null>(null);
 const countdown = ref(0);
 const rooms = ref<DisplayRoom[]>([]);
+
+// [DEBUG] variables for burn effect
+const debugClicks = ref(0);
+const lastClickTime = ref(Date.now());
+let burnDebugTimeout: NodeJS.Timeout | null = null;
+
 const roomsHistory = ref<Record<string, ProcessedHistoryEntry[]>>({});
 const cards = ref<StatisticCardObj[]>([]);
 const charts = ref<{ data: ChartData; options: ChartOptions }[]>([]);
@@ -481,6 +487,36 @@ function unsubscribeFromCurrentRoom() {
 
 // ----- EVENT HANDLERS -----
 
+// [DEBUG]
+function handleDebugClick() {
+  const now = Date.now();
+  const timeDiff = now - lastClickTime.value;
+
+  if (timeDiff > 10000) {
+    // Reset if more than 10 seconds have passed
+    debugClicks.value = 1;
+  } else {
+    debugClicks.value++;
+  }
+
+  lastClickTime.value = now;
+
+  // Check if we've reached 7 clicks within the time window
+  if (debugClicks.value === 7) {
+    debugClicks.value = 0; // Reset clicks
+    isBurning.value = true;
+
+    // Auto-disable after 10 seconds
+    if (burnDebugTimeout) {
+      clearTimeout(burnDebugTimeout);
+    }
+    burnDebugTimeout = setTimeout(() => {
+      isBurning.value = false;
+      burnDebugTimeout = null;
+    }, 10000);
+  }
+}
+
 function roomSelected(room: DisplayRoom) {
   // Check if its a different room before updating
   if (selectedRoom.value?.roomId !== room.roomId) {
@@ -544,8 +580,9 @@ watch(
           { 'h-[90vh] flex justify-center items-center': minimizedStore.isMinimized },
         ]"
       >
+        <!-- [DEBUG] for click-event -->
         <StatisticCard
-          v-for="card in cards"
+          v-for="(card, index) in cards"
           :key="card.title"
           class="stat-card"
           :title="card.title"
@@ -554,6 +591,7 @@ watch(
           :unit="card.unit"
           :normalRange="card.normalRange"
           :criticalText="card.criticalText"
+          @click="index === 0 && handleDebugClick()"
         />
       </div>
 
@@ -585,13 +623,13 @@ watch(
     </div>
     <div v-else>
       <Dialog
-          v-model:visible="isBurning"
-          modal
-          header="🔥🔥🔥🔥 DER RAUM BRENNT 🔥🔥🔥🔥"
-          :style="{ width: '100vw', height: '90%' }"
-          contentStyle="height: 100%; overflow: hidden;"
+        v-model:visible="isBurning"
+        modal
+        header="🔥🔥🔥🔥 DER RAUM BRENNT 🔥🔥🔥🔥"
+        :style="{ width: '100vw', height: '90%' }"
+        contentStyle="height: 100%; overflow: hidden;"
       >
-        <div style="position: relative; width: 100%; height: 100%;">
+        <div style="position: relative; width: 100%; height: 100%">
           <Burning />
         </div>
       </Dialog>

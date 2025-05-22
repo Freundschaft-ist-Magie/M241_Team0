@@ -20,7 +20,7 @@ const char* mqttQueue = MQTT_QUEUE;
 const char* mqttPingTopic = MQTT_PING_TOPIC;
 const boolean debuggingEnabled = DEBUGGING_ENABLED;
 
-#define SENSOR_POWER_PIN 8
+#define SENSOR_POWER_PIN 9
 #define CACHE_LIMIT 60
 #define MEASURE_INTERVAL_CONNECTED 1000
 #define MEASURE_INTERVAL_DISCONNECTED 30000

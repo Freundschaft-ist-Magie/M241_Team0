@@ -18,25 +18,40 @@ const filteredRoomData = computed(() => {
   const data = props.roomData[props.selectedRoom.roomId];
   if (!data) return [];
   // Optional: Id hinzufügen, wenn gewünscht
-  return data.map((entry, index) => ({
-    id: index + 1,
-    ...entry
-  })).reverse();
-
+  return data
+    .map((entry, index) => ({
+      id: index + 1,
+      ...entry,
+    }))
+    .reverse();
 });
 </script>
 
 <template>
   <Accordion v-if="props.selectedRoom" value="0">
     <AccordionPanel value="0">
-      <AccordionHeader>Raumtabelle für Raum {{ props.selectedRoom.room.macAddress }}</AccordionHeader>
+      <AccordionHeader>
+        Raumtabelle für Raum
+        <template v-if="props.selectedRoom.room.name">
+          {{ " " + props.selectedRoom.room.name }}
+        </template>
+        <template
+          v-if="props.selectedRoom.room.name && props.selectedRoom.room.macAddress"
+        >
+          ,
+        </template>
+        <template v-if="props.selectedRoom.room.macAddress">
+          {{ " " + props.selectedRoom.room.macAddress }}
+        </template>
+      </AccordionHeader>
+
       <AccordionContent>
         <DataTable
-            :value="filteredRoomData"
-            tableStyle="min-width: 50rem"
-            paginator
-            :rows="5"
-            :rowsPerPageOptions="[5, 10, 20, 50]"
+          :value="filteredRoomData"
+          tableStyle="min-width: 50rem"
+          paginator
+          :rows="5"
+          :rowsPerPageOptions="[5, 10, 20, 50]"
         >
           <Column field="id" header="#"></Column>
           <Column field="humidity" header="Feuchtigkeit"></Column>
@@ -46,7 +61,7 @@ const filteredRoomData = computed(() => {
           <Column field="timeStamp" header="Zeitstempel">
             <template #body="slotProps">
               {{ GlobalHelper.beautifyDate(slotProps.data.timeStamp) }}
-              </template>
+            </template>
           </Column>
         </DataTable>
       </AccordionContent>

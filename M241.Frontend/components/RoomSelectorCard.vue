@@ -49,6 +49,7 @@ function handleRoomSelected(room: Room) {
           Charts werden aktualisiert in {{ countdown }} Sekunden.
         </p>
       </div>
+
       <Button
         v-if="selectedRoom"
         icon="pi pi-wifi"

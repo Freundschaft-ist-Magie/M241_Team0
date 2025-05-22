@@ -72,26 +72,24 @@ class GlobalHelper {
   public static MapCompGas(gasResistance: number, humidity: number) {
     const { title, icon, unit, normalRange, criticalText } = config.compGas;
 
-    const humReference = 40;
-    const gasLowerLimit = 10000;
-    const gasUpperLimit = 300000;
-
-    const humidityScore =
+    const iaq = Math.min(
+    500,
+    (100 -
+      (Math.min(
+        25,
         humidity >= 38 && humidity <= 42
-            ? 25
-            : humidity < 38
-                ? (0.25 / humReference) * humidity * 100
-                : ((-0.25 / (100 - humReference)) * humidity + 0.416666) * 100;
-
-    const gasScoreRaw = (
-        (0.75 / (gasUpperLimit - gasLowerLimit)) * gasResistance -
-        (gasLowerLimit * (0.75 / (gasUpperLimit - gasLowerLimit)))
-    ) * 100;
-
-    const gasScore = Math.max(0, Math.min(75, gasScoreRaw));
-
-    const airScore = humidityScore + gasScore;
-    const iaq = (100 - airScore) * 5;
+          ? 25
+          : humidity < 38
+          ? (0.25 / 40) * humidity * 100
+          : ((-0.25 / (100 - 40)) * humidity + 0.416666) * 100
+      ) +
+        Math.min(
+          75,
+          ((0.75 / (300000 - 10000)) * gasResistance -
+            10000 * (0.75 / (300000 - 10000))) *
+            100
+        ))) * 5
+  );
 
     return this.MapData(iaq, {
       title,
